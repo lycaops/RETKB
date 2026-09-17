@@ -7,7 +7,6 @@ import {
   FileText,
   BookOpen,
   Globe,
-  Layers,
   Calculator as CalcIcon,
   Users,
   LogOut,
@@ -17,7 +16,7 @@ import {
 const LOGO_URL = '/logo.png';
 
 export default function Layout({ children }) {
-  const { t, lang, setLang, scheme, setScheme } = useApp();
+  const { t, lang, setLang } = useApp();
   const { user, profile, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -99,29 +98,6 @@ export default function Layout({ children }) {
             <h1 className="text-lg font-semibold text-slate-800">{t('appTitle')}</h1>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200">
-              <Layers className="w-4 h-4 text-slate-400" />
-              <button
-                onClick={() => setScheme('special')}
-                className={`px-2.5 py-1 text-xs rounded font-medium transition-colors ${
-                  scheme === 'special'
-                    ? 'bg-[#08dc7d] text-[#21264e]'
-                    : 'text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                {t('scheme_special')}
-              </button>
-              <button
-                onClick={() => setScheme('normal')}
-                className={`px-2.5 py-1 text-xs rounded font-medium transition-colors ${
-                  scheme === 'normal'
-                    ? 'bg-[#21264e] text-white'
-                    : 'text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                {t('scheme_normal')}
-              </button>
-            </div>
             <Globe className="w-4 h-4 text-slate-400" />
             <button
               onClick={() => setLang('en')}

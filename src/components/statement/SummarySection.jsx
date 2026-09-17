@@ -1,6 +1,7 @@
 import React from "react";
 import { useApp } from "@/lib/AppContext";
 import { formatCurrency, formatNumber } from "@/lib/csvUtils";
+import { CreditCard, Building2, Ticket, Wallet } from "lucide-react";
 
 function MetricRow({ label, value, color, bold }) {
   return (
@@ -18,9 +19,17 @@ export default function SummarySection({ statement }) {
   const s = statement.summary;
   const fmt = (v) => (v === null ? "—" : formatCurrency(v, lang));
   const moodMap = { SBT: t("payment_mood_sbt"), BT: t("payment_mood_bt"), VOU: t("payment_mood_vou") };
-  const moodLabel = statement.paymentMood
-    ? `${statement.paymentMood} — ${moodMap[statement.paymentMood] || ""}`.trim()
-    : "—";
+  const moodIconMap = { SBT: CreditCard, BT: Building2, VOU: Ticket };
+  const MoodIcon = statement.paymentMood ? moodIconMap[statement.paymentMood] || Wallet : null;
+  const moodLabel = statement.paymentMood ? (
+    <span className="inline-flex items-center gap-2">
+      {MoodIcon && <MoodIcon className="w-4 h-4" />}
+      <span>
+        {statement.paymentMood}
+        {moodMap[statement.paymentMood] ? ` — ${moodMap[statement.paymentMood]}` : ""}
+      </span>
+    </span>
+  ) : "—";
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

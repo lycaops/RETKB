@@ -4,18 +4,13 @@ import Layout from "@/components/Layout";
 import StatementPreview from "@/components/statement/StatementPreview";
 import { useApp } from "@/lib/AppContext";
 import { exportStatementPDF } from "@/lib/pdfExport";
-import { ArrowLeft, Download, Loader2, Wallet } from "lucide-react";
+import { ArrowLeft, Download, Loader2 } from "lucide-react";
 
 export default function Statement() {
   const { t, lang, selectedRetailer, setLang } = useApp();
   const navigate = useNavigate();
   const previewRef = useRef(null);
   const [exporting, setExporting] = useState(false);
-  const [showMood, setShowMood] = useState(false);
-
-  const paymentMood = selectedRetailer
-    ? (selectedRetailer["PAYMENT MOOD"] || selectedRetailer.paymentMood || "")
-    : "";
 
   const handlePDF = async () => {
     if (!previewRef.current || !selectedRetailer) return;
@@ -58,13 +53,6 @@ export default function Statement() {
             <ArrowLeft className="w-4 h-4" /> {t("back_to_dashboard")}
           </button>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowMood(!showMood)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 font-medium"
-            >
-              <Wallet className="w-4 h-4" />
-              {showMood && paymentMood ? `${t("payment_mood")}: ${paymentMood}` : t("show_payment_mood")}
-            </button>
             <button
               onClick={() => setLang(lang === "en" ? "it" : "en")}
               className="px-3 py-2 text-sm rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 font-medium"
