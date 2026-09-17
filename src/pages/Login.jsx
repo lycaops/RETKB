@@ -36,19 +36,6 @@ export default function Login() {
       icon={LogIn}
       title="Welcome back"
       subtitle="Log in to your account"
-      footer={
-        <>
-          Don't have an account?{' '}
-          <Link
-            to={
-              '/register' + (returnTo !== '/' ? '?returnTo=' + encodeURIComponent(returnTo) : '')
-            }
-            className="text-primary font-medium hover:underline"
-          >
-            Create one
-          </Link>
-        </>
-      }
     >
       {error && (
         <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
@@ -58,7 +45,9 @@ export default function Login() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email" className="text-[#26324d]">
+            Email
+          </Label>
           <div className="relative">
             <Mail
               className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
@@ -79,8 +68,13 @@ export default function Login() {
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
-            <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+            <Label htmlFor="password" className="text-[#26324d]">
+              Password
+            </Label>
+            <Link
+              to="/forgot-password"
+              className="text-xs font-medium text-[#006ae0] hover:underline"
+            >
               Forgot password?
             </Link>
           </div>
@@ -93,7 +87,7 @@ export default function Login() {
               id="password"
               type="password"
               autoComplete="current-password"
-              placeholder="••••••••"
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="pl-10 h-12"
@@ -101,7 +95,11 @@ export default function Login() {
             />
           </div>
         </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
+        <Button
+          type="submit"
+          className="h-12 w-full bg-[#006ae0] font-medium text-white shadow-[0_10px_20px_rgba(0,106,224,0.18)] hover:bg-[#0056b8]"
+          disabled={loading}
+        >
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />

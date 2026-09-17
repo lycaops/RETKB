@@ -50,7 +50,7 @@ export default function Layout({ children }) {
   return (
     <div className="min-h-screen bg-slate-50 flex">
       <aside
-        className="w-64 shrink-0 hidden md:flex flex-col"
+        className="sticky top-0 h-screen w-64 shrink-0 hidden md:flex flex-col"
         style={{ backgroundColor: '#21264e' }}
       >
         <div className="px-6 py-6 border-b border-white/10">
