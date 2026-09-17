@@ -38,7 +38,7 @@ const SIM_MARGIN = 5;
 
 // Special: New Activations
 // entries: [{ bonus, qty }], t1, t2 (eligible renewal counts)
-export function calcSpecialNew(entries, t1, t2) {
+export function calcSpecialNew(entries, t1, t2, withRecharge = false, withMargin = true) {
   const totalActs = entries.reduce((s, e) => s + (Number(e.qty) || 0), 0);
   let actTotal = 0;
   const actRows = [];
@@ -75,9 +75,11 @@ export function calcSpecialNew(entries, t1, t2) {
 
   const t1Total = t1Used * 4;
   const t2Total = t2Used * 4;
-  const grand = actTotal + t1Total + t2Total;
+  const rechargeTotal = withRecharge ? totalActs * AVG_LTE_NEW : 0;
+  const simMarginTotal = withMargin ? totalActs * SIM_MARGIN : 0;
+  const grand = actTotal + t1Total + t2Total + rechargeTotal + simMarginTotal;
 
-  return { totalActs, actRows, actTotal, t1Used, t2Used, t1Total, t2Total, t1Hint, t2Hint, grand };
+  return { totalActs, actRows, actTotal, t1Used, t2Used, t1Total, t2Total, t1Hint, t2Hint, rechargeTotal, simMarginTotal, grand };
 }
 
 // Special: MNP Port-In

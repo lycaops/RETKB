@@ -103,7 +103,7 @@ export function computeSummary(row, scheme = "special") {
   };
 }
 
-export function computeBreakdown(row, lang) {
+export function computeBreakdown(row, lang, scheme = "special") {
   const allFields = [
     ...EARNING_FIELDS,
     ...BREAKDOWN_BONUS_FIELDS,
@@ -132,7 +132,11 @@ export function computeBreakdown(row, lang) {
     "TOTAL PAID (SBT+BT+VOU)": "payment",
   };
 
-  return allFields
+  const fields = scheme === "normal"
+    ? allFields.filter((field) => field !== "T1 BONUS" && field !== "T2 BONUS")
+    : allFields;
+
+  return fields
     .map((f) => {
       const value = getNumber(row, f);
       if (value === null || value === 0) return null;
@@ -282,7 +286,7 @@ export function computeEligibility(perf, scheme = "special") {
   return { t1Status, t2Status, nationalRenewalStatus, portinRenewalStatus, t1Threshold, t2Threshold, nationalMin, portinMin };
 }
 
-export function computeInsights(row, summary, perf, lang, scheme = "special") {
+export function computeInsights(row, summary, perf, lang, scheme = "special", activationSummary = null) {
   const th = schemes[scheme].renewalThresholds;
   const insights = [];
   const add = (severity, text) => insights.push({ severity, text });
@@ -345,6 +349,26 @@ export function computeInsights(row, summary, perf, lang, scheme = "special") {
       ? `Discrepanza tra totale sorgente (${(summary.totalCommissionSource ?? 0).toFixed(2)} €) e riconciliazione calcolata (${summary.calculatedTotal.toFixed(2)} €).`
       : `Discrepancy between source total (€${(summary.totalCommissionSource ?? 0).toFixed(2)}) and calculated reconciliation (€${summary.calculatedTotal.toFixed(2)}).`);
   }
+  const newActivationEarnings = activationSummary?.newActivations?.earnings;
+  const newActivationBonus = summary.bundle1Comm;
+  if (
+    newActivationEarnings !== null &&
+    newActivationEarnings !== undefined &&
+    newActivationBonus !== null &&
+    newActivationBonus !== undefined &&
+    Math.abs(newActivationEarnings - newActivationBonus) > 0.01
+  ) {
+    const difference = newActivationEarnings - newActivationBonus;
+    const differenceText = difference >= 0
+      ? `€${difference.toFixed(2)} higher`
+      : `€${Math.abs(difference).toFixed(2)} lower`;
+    const reason = scheme === "special"
+      ? "because this retailer belongs to the special category and uses the special activation incentive rules"
+      : "because the source bonus and calculated activation earnings use different statement inputs";
+    add("info", lang === "it"
+      ? `Differenza bonus nuove attivazioni: ${differenceText} rispetto al bonus registrato, ${reason}.`
+      : `New activation earnings differ by ${differenceText} from the recorded New Activation Bonus ${reason}.`);
+  }
   if (insights.length === 0) {
     add("info", lang === "it"
       ? "Dati insufficienti per generare insight significativi."
@@ -355,11 +379,11 @@ export function computeInsights(row, summary, perf, lang, scheme = "special") {
 
 export function buildRetailerStatement(row, lang, scheme = "special") {
   const summary = computeSummary(row, scheme);
-  const breakdown = computeBreakdown(row, lang);
+  const breakdown = computeBreakdown(row, lang, scheme);
   const performance = computePerformance(row);
   const activationSummary = computeActivationSummary(row);
   const eligibility = computeEligibility(performance, scheme);
-  const insights = computeInsights(row, summary, performance, lang, scheme);
+  const insights = computeInsights(row, summary, performance, lang, scheme, activationSummary);
 
   return {
     retailerId: getText(row, "RETAILER ID"),

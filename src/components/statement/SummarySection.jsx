@@ -1,6 +1,6 @@
 import React from "react";
 import { useApp } from "@/lib/AppContext";
-import { formatCurrency, formatNumber } from "@/lib/csvUtils";
+import { formatCurrency } from "@/lib/csvUtils";
 import { CreditCard, Building2, Ticket, Wallet, Forward } from "lucide-react";
 
 function MetricRow({ label, value, color, bold }) {
@@ -18,14 +18,6 @@ export default function SummarySection({ statement }) {
   const { t, lang } = useApp();
   const s = statement.summary;
   const fmt = (v) => (v === null ? "—" : formatCurrency(v, lang));
-  const moodMap = {
-    "C/F": t("payment_mood_cf"), "CF": t("payment_mood_cf"),
-    "By C/F": t("payment_mood_cf"), "By CF": t("payment_mood_cf"), "by C/F": t("payment_mood_cf"),
-    SBT: t("payment_mood_sbt"), "By SBT": t("payment_mood_sbt"), "by SBT": t("payment_mood_sbt"),
-    BT: t("payment_mood_bt"), "By BT": t("payment_mood_bt"), "by BT": t("payment_mood_bt"),
-    VOU: t("payment_mood_vou"), Vou: t("payment_mood_vou"),
-    "By Vou": t("payment_mood_vou"), "By VOU": t("payment_mood_vou"), "by Vou": t("payment_mood_vou"), "by VOU": t("payment_mood_vou"),
-  };
   const moodIconMap = {
     "C/F": Forward, "CF": Forward,
     "By C/F": Forward, "By CF": Forward, "by C/F": Forward,
@@ -34,13 +26,16 @@ export default function SummarySection({ statement }) {
     VOU: Ticket, Vou: Ticket, "By Vou": Ticket, "By VOU": Ticket, "by Vou": Ticket, "by VOU": Ticket,
   };
   const MoodIcon = statement.paymentMood ? moodIconMap[statement.paymentMood] || Wallet : null;
+  const moodCodeMap = {
+    "C/F": "CF", CF: "CF", "By C/F": "CF", "By CF": "CF", "by C/F": "CF",
+    SBT: "SBT", "By SBT": "SBT", "by SBT": "SBT",
+    BT: "BT", "By BT": "BT", "by BT": "BT",
+    VOU: "VOU", Vou: "VOU", "By Vou": "VOU", "By VOU": "VOU", "by Vou": "VOU", "by VOU": "VOU",
+  };
   const moodLabel = statement.paymentMood ? (
     <span className="inline-flex items-center gap-2">
       {MoodIcon && <MoodIcon className="w-4 h-4" />}
-      <span>
-        {statement.paymentMood}
-        {moodMap[statement.paymentMood] ? ` — ${moodMap[statement.paymentMood]}` : ""}
-      </span>
+      <span>{moodCodeMap[statement.paymentMood] || statement.paymentMood}</span>
     </span>
   ) : "—";
 
@@ -53,8 +48,8 @@ export default function SummarySection({ statement }) {
         </h3>
         <MetricRow label={t("total_commission_label")} value={fmt(s.totalCommissionSource)} color="#FFDD64" bold />
         <MetricRow label={t("new_activation_bonus")} value={fmt(s.bundle1Comm)} color="#08dc7d" />
-        <MetricRow label={t("t1_renewal_bonus")} value={fmt(s.qualityBonus)} color="#08dc7d" />
-        <MetricRow label={t("t2_renewal_bonus")} value={fmt(s.volumeBonus)} color="#08dc7d" />
+        {statement.scheme === "special" && <MetricRow label={t("t1_renewal_bonus")} value={fmt(s.qualityBonus)} color="#08dc7d" />}
+        {statement.scheme === "special" && <MetricRow label={t("t2_renewal_bonus")} value={fmt(s.volumeBonus)} color="#08dc7d" />}
         <MetricRow label={t("port_in_bonus")} value={fmt(s.portInBonus)} color="#08dc7d" />
         <MetricRow label={t("total_refund")} value={fmt(s.refund)} color="#00D7FF" />
       </div>

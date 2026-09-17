@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 
 function fmt(n) { return `€${n.toFixed(2)}`; }
 
-const SpecialNewCalculator = forwardRef(function SpecialNewCalculator({ onResult }, ref) {
+const SpecialNewCalculator = forwardRef(function SpecialNewCalculator({ onResult, withRecharge = false, withMargin = true, showResult = false }, ref) {
   const { lang } = useApp();
   const [entries, setEntries] = useState([{ bonus: "3.00", qty: "" }]);
   const [t1, setT1] = useState(0);
@@ -27,7 +27,7 @@ const SpecialNewCalculator = forwardRef(function SpecialNewCalculator({ onResult
 
   const calculate = () => {
     const parsed = entries.map((e) => ({ bonus: Number(e.bonus) || 0, qty: Number(e.qty) || 0 }));
-    const nextResult = calcSpecialNew(parsed, Number(t1) || 0, Number(t2) || 0);
+    const nextResult = calcSpecialNew(parsed, Number(t1) || 0, Number(t2) || 0, withRecharge, withMargin);
     setResult(nextResult);
     onResult?.(nextResult);
   };
@@ -70,7 +70,7 @@ const SpecialNewCalculator = forwardRef(function SpecialNewCalculator({ onResult
       </div>
 
 
-      {result && (
+      {showResult && result && (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 space-y-2">
           <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">{lang === "it" ? "Riepilogo Guadagni" : "Earnings Breakdown"}</p>
           {result.actRows.map((r, i) => (
