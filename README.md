@@ -71,6 +71,11 @@ What this migration creates:
 | `create_app_profile(p_auth_uid, p_role, …)` RPC | SECURITY-DEFINER, admin-only. Assigns profile + role/scope to an existing Auth user by UUID |
 | `on_auth_user_created` trigger | When Supabase Auth creates a user, auto-insert a `viewer` profile so they can sign in even before the admin touches them |
 
+The admin user-management page creates new Auth users through the protected
+`admin-create-user` Edge Function. The function verifies the signed-in admin,
+creates the confirmed Auth account, and upserts its application profile with the
+selected role and branch/zone scope.
+
 ### Step 3c — Insert branches & zones
 
 Branches & zones are **already seeded** at the bottom of the migration file (8 branches: LMIT-HS-BARI/BOLOGNA/MILAN/NAPLES/PADOVA/PALERMO/ROME/TORINO, plus 29 zones — BARI 1-3, BOLOGNA 1-3, MILANO 1-4, NAPOLI 1-7, PADOVA 1-2, PALERMO 1-3, ROMA 1-5, TORINOO 1-3). If you ever need to re-add them, the seed is idempotent (`on conflict do nothing`) — just re-run the inserts from §8a/§8b of the migration.
@@ -95,7 +100,24 @@ select public.create_app_profile(
 );
 ```
 
-That's it. The admin can now sign in at `/login` and access `/users` to assign roles to other team members.
+That's it. The admin can now sign in at `/login` and access `/users` to create
+and manage other team members.
+
+### Step 3e — Deploy the admin user function
+
+The function needs the Supabase project secrets and must never be deployed to
+the frontend bundle. From the repository root, link the Supabase project and
+deploy it:
+
+```bash
+supabase login
+supabase link --project-ref <PROJECT_REF>
+supabase functions deploy admin-create-user
+```
+
+`SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` are
+provided automatically by Supabase Edge Functions. The service-role key is
+used only inside the function and must not be added to `.env.local` or Vercel.
 
 ---
 

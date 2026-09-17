@@ -52,8 +52,8 @@ export default function UserManagement() {
   const [openForm, setOpenForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
-    auth_uid: "",
     email: "",
+    password: "",
     full_name: "",
     role: "viewer",
     branch_id: "",
@@ -105,8 +105,8 @@ export default function UserManagement() {
 
   const resetForm = () => {
     setForm({
-      auth_uid: "",
       email: "",
+      password: "",
       full_name: "",
       role: "viewer",
       branch_id: "",
@@ -124,8 +124,8 @@ export default function UserManagement() {
   const openEdit = (row) => {
     setEditingId(row.id);
     setForm({
-      auth_uid: "",
       email: row.email || "",
+      password: "",
       full_name: row.full_name || "",
       role: row.role || "viewer",
       branch_id: row.branch_id || "",
@@ -151,8 +151,12 @@ export default function UserManagement() {
   };
 
   const validateForm = () => {
-    if (!editingId && !form.auth_uid.trim()) {
-      setError("Auth User ID is required when assigning a profile to a new user.");
+    if (!editingId && !form.email.trim()) {
+      setError("Email is required when creating a new user.");
+      return false;
+    }
+    if (!editingId && form.password.length < 6) {
+      setError("Password must be at least 6 characters.");
       return false;
     }
     if (!form.role) {
@@ -190,15 +194,18 @@ export default function UserManagement() {
         if (updErr) throw updErr;
         setSuccess("User updated successfully.");
       } else {
-        const { error: rpcErr } = await supabase.rpc("create_app_profile", {
-          p_auth_uid: form.auth_uid.trim(),
-          p_role: form.role,
-          p_branch_id: form.branch_id || null,
-          p_zone_id: form.zone_id || null,
-          p_full_name: form.full_name.trim() || null,
+        const { error: functionErr } = await supabase.functions.invoke("admin-create-user", {
+          body: {
+            email: form.email.trim(),
+            password: form.password,
+            full_name: form.full_name.trim() || null,
+            role: form.role,
+            branch_id: form.branch_id || null,
+            zone_id: form.zone_id || null,
+          },
         });
-        if (rpcErr) throw rpcErr;
-        setSuccess("Profile assigned. Have the user sign in once with their Supabase Auth account.");
+        if (functionErr) throw functionErr;
+        setSuccess("User created and profile assigned successfully.");
       }
       resetForm();
       await loadAll();
@@ -249,7 +256,7 @@ export default function UserManagement() {
               <Shield className="w-5 h-5" /> User Management
             </h1>
             <p className="text-sm text-white/70 mt-1">
-              Admin-only: assign roles & branch/zone scope to users.
+              Admin-only: create users and assign roles & branch/zone scope.
             </p>
           </div>
           <button
@@ -257,16 +264,15 @@ export default function UserManagement() {
             className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-[#21264e]"
             style={{ backgroundColor: "#08dc7d" }}
           >
-            <UserPlus className="w-4 h-4" /> Assign Profile
+            <UserPlus className="w-4 h-4" /> Create User
           </button>
         </div>
 
         <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 flex gap-2 text-sm text-amber-800">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <div className="leading-relaxed">
-            <strong>First create the user in Supabase Auth</strong> (Authentication → Users → Add user). Copy their
-            User UID and paste it below. Then click <strong>Assign Profile</strong> to set their role &amp; scope.
-            Hard-delete Auth users via the Supabase Dashboard; here you can soft-disable their profile.
+            New users are created in Supabase Auth and assigned their application profile automatically. Hard-delete
+            Auth users via the Supabase Dashboard; here you can soft-disable their profile.
           </div>
         </div>
 
@@ -288,7 +294,7 @@ export default function UserManagement() {
                 {editingId ? (
                   <><Pencil className="w-4 h-4 text-[#006AE0]" /> Edit User</>
                 ) : (
-                  <><UserPlus className="w-4 h-4 text-[#08dc7d]" /> Assign Profile to Existing Auth User</>
+                    <><UserPlus className="w-4 h-4 text-[#08dc7d]" /> Create New User</>
                 )}
               </h2>
               <button onClick={resetForm} className="text-slate-400 hover:text-slate-600">
@@ -297,24 +303,6 @@ export default function UserManagement() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {!editingId && (
-                <div className="md:col-span-2">
-                  <label className="text-xs text-slate-500 uppercase tracking-wide">
-                    Supabase Auth User UID <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.auth_uid}
-                    onChange={(e) => handleFormChange("auth_uid", e.target.value)}
-                    placeholder="e.g. a1b2c3d4-1234-5678-9abc-def012345678"
-                    className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#006AE0] font-mono"
-                  />
-                  <p className="text-[11px] text-slate-500 mt-1">
-                    Find this in Supabase Dashboard → Authentication → Users → (click user) → User UID.
-                  </p>
-                </div>
-              )}
-
               <div>
                 <label className="text-xs text-slate-500 uppercase tracking-wide">Full Name</label>
                 <input
@@ -327,16 +315,34 @@ export default function UserManagement() {
               </div>
 
               <div>
-                <label className="text-xs text-slate-500 uppercase tracking-wide">Email (info only)</label>
+                <label className="text-xs text-slate-500 uppercase tracking-wide">
+                  Email {!editingId && <span className="text-red-500">*</span>}
+                </label>
                 <input
                   type="email"
-                  disabled={!editingId}
+                  disabled={!!editingId}
                   value={form.email}
                   onChange={(e) => handleFormChange("email", e.target.value)}
-                  placeholder={editingId ? "name@example.com" : "Auto-synced from Auth on sign-in"}
+                  placeholder="name@example.com"
                   className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#006AE0] disabled:bg-slate-50 disabled:text-slate-400"
                 />
               </div>
+
+              {!editingId && (
+                <div>
+                  <label className="text-xs text-slate-500 uppercase tracking-wide">
+                    Temporary Password <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    value={form.password}
+                    onChange={(e) => handleFormChange("password", e.target.value)}
+                    placeholder="At least 6 characters"
+                    autoComplete="new-password"
+                    className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#006AE0]"
+                  />
+                </div>
+              )}
 
               <div className="md:col-span-2">
                 <label className="text-xs text-slate-500 uppercase tracking-wide">Role</label>
@@ -422,7 +428,7 @@ export default function UserManagement() {
                 style={{ backgroundColor: "#006AE0" }}
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {editingId ? "Save Changes" : "Assign Profile"}
+                {editingId ? "Save Changes" : "Create User"}
               </button>
             </div>
           </div>
