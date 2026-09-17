@@ -94,7 +94,7 @@ export default function Layout({ children }) {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0">
           <div className="flex items-center gap-3">
-            <img src={LOGO_URL} alt="Logo" crossOrigin="anonymous" className="h-7 md:hidden" />
+            <img src="/logo_b.webp" alt="Logo" crossOrigin="anonymous" className="h-8 w-auto md:hidden" />
             <h1 className="text-lg font-semibold text-slate-800">{t('appTitle')}</h1>
           </div>
           <div className="flex items-center gap-3">
@@ -136,30 +136,37 @@ export default function Layout({ children }) {
           </div>
         </header>
 
-        <div className="md:hidden flex gap-1 px-3 py-2 bg-white border-b border-slate-200 overflow-x-auto">
+        <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 flex items-stretch justify-around border-t border-slate-200 bg-white/95 px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] shadow-[0_-4px_16px_rgba(33,38,78,0.08)] backdrop-blur">
           {navItems.map((item) => {
             const active = location.pathname === item.to;
+            const Icon = item.icon;
             return (
               <button
                 key={item.to}
                 onClick={() => navigate(item.to)}
-                className={`px-3 py-1.5 text-sm rounded-md font-medium whitespace-nowrap ${
-                  active ? 'bg-[#21264e] text-white' : 'text-slate-600 bg-slate-100'
+                title={item.label}
+                aria-label={item.label}
+                className={`flex min-w-0 flex-1 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-medium transition-colors ${
+                  active ? 'bg-[#21264e] text-white' : 'text-slate-500 hover:bg-slate-100'
                 }`}
               >
-                {item.label}
+                <Icon className="h-5 w-5" />
+                <span className="truncate max-w-full">{item.label}</span>
               </button>
             );
           })}
           <button
             onClick={() => logout(true)}
-            className="px-3 py-1.5 text-sm rounded-md font-medium whitespace-nowrap text-red-600 bg-red-50 ml-auto"
+            title="Logout"
+            aria-label="Logout"
+            className="flex min-w-0 flex-1 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-medium text-red-600 hover:bg-red-50"
           >
-            Logout
+            <LogOut className="h-5 w-5" />
+            <span>Logout</span>
           </button>
-        </div>
+        </nav>
 
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 overflow-auto pb-20 md:pb-0">{children}</main>
       </div>
     </div>
   );

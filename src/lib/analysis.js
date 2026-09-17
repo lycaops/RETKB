@@ -233,6 +233,7 @@ export function computePerformance(row) {
 
   const totalPortouts = getNumber(row, "TOTAL_PORTOUT");
   const portoutDeduction = getNumber(row, "PORTOUT DEDUCTION");
+  const fakePortOutPct = getNumber(row, "FAKE PORT OUT %");
   const blockedActivations = getNumber(row, "BLOCKED_NOOFACTIVATIONS");
 
   return {
@@ -246,7 +247,7 @@ export function computePerformance(row) {
       newActRenewalRate, portinRenewalRate,
     },
     usage: { usagePct, usageClawback, usageRefund },
-    portout: { totalPortouts, portoutDeduction },
+    portout: { totalPortouts, portoutDeduction, fakePortOutPct },
     blocked: { blockedActivations },
   };
 }

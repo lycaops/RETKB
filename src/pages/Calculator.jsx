@@ -133,6 +133,8 @@ export default function Calculator() {
               {newResult?.actRows?.map((row, index) => <CalculationRow key={index} label={`${row.qty} × €${row.bonus.toFixed(2)} activation bonus`} value={row.amount} muted />)}
               {newResult?.t1Total > 0 && <CalculationRow label={`T1: ${newResult.t1Used} × €4`} value={newResult.t1Total} muted />}
               {newResult?.t2Total > 0 && <CalculationRow label={`T2: ${newResult.t2Used} × €4`} value={newResult.t2Total} muted />}
+              {newResult?.rechargeTotal > 0 && <CalculationRow label={lang === "it" ? "Cashback Ricarica Automatica" : "Auto Recharge Cashback"} value={newResult.rechargeTotal} muted />}
+              {newResult?.simMarginTotal > 0 && <CalculationRow label={lang === "it" ? "Margine SIM Nuove Attivazioni" : "New Activation SIM Margin"} value={newResult.simMarginTotal} muted />}
               {newResult && <CalculationRow label={lang === "it" ? "Totale Nuove Attivazioni" : "New Activation Total"} value={newResult.grand} />}
               {mnpResult && <>
                 <p className="font-semibold text-slate-800 pt-2">MNP Port-In</p>
@@ -140,12 +142,10 @@ export default function Calculator() {
                 {mnpResult.stdGT !== undefined && <CalculationRow label={`${mnpResult.stdGT / (mnpResult.rateGT || 1)} × €${mnpResult.rateGT} (> €6.99)`} value={mnpResult.stdGT} muted />}
                 {mnpResult.garaPremTotal > 0 && <CalculationRow label={`GARA Premium: ${mnpResult.garaPremTotal / 40} × €40`} value={mnpResult.garaPremTotal} muted />}
                 {mnpResult.garaOthTotal > 0 && <CalculationRow label={`GARA Other: ${mnpResult.garaOthTotal / 20} × €20`} value={mnpResult.garaOthTotal} muted />}
+                {mnpResult.rechargeTotal > 0 && <CalculationRow label={lang === "it" ? "Cashback Ricarica Automatica" : "Auto Recharge Cashback"} value={mnpResult.rechargeTotal} muted />}
+                {mnpResult.simMarginTotal > 0 && <CalculationRow label={lang === "it" ? "Margine SIM MNP" : "MNP SIM Margin"} value={mnpResult.simMarginTotal} muted />}
                 <CalculationRow label={lang === "it" ? "Totale MNP" : "MNP Activation Total"} value={mnpResult.grand} />
               </>}
-              {newResult?.rechargeTotal > 0 && <CalculationRow label={lang === "it" ? "Cashback Ricarica Automatica" : "Auto Recharge Cashback"} value={newResult.rechargeTotal} muted />}
-              {mnpResult?.rechargeTotal > 0 && <CalculationRow label={lang === "it" ? "Cashback Ricarica Automatica MNP" : "MNP Auto Recharge Cashback"} value={mnpResult.rechargeTotal} muted />}
-              {newResult?.simMarginTotal > 0 && <CalculationRow label={lang === "it" ? "Margine SIM Nuove Attivazioni" : "New Activation SIM Margin"} value={newResult.simMarginTotal} muted />}
-              {mnpResult?.simMarginTotal > 0 && <CalculationRow label={lang === "it" ? "Margine SIM MNP" : "MNP SIM Margin"} value={mnpResult.simMarginTotal} muted />}
               <div className="flex justify-between border-t border-emerald-200 pt-2"><span className="font-semibold text-slate-700">{lang === "it" ? "Guadagni Totali" : "Total Earnings"}</span><span className="text-2xl font-bold text-emerald-600">€{totalEstimate.toFixed(2)}</span></div>
             </div>
           </div>

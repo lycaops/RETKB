@@ -65,6 +65,10 @@ export function PortOutSection({ statement }) {
           <p className="text-xs text-slate-500">{t("portout_deduction")}</p>
           <p className="text-lg font-bold text-[#b04a30] mt-0.5">{fmt(p.portoutDeduction)}</p>
         </div>
+        <div className="bg-slate-50 rounded-lg p-3">
+          <p className="text-xs text-slate-500">Fake port out %</p>
+          <p className="text-lg font-bold text-slate-800 mt-0.5">{p.fakePortOutPct === null ? "—" : `${p.fakePortOutPct}%`}</p>
+        </div>
       </div>
       <p className="text-xs text-slate-400 mt-3">{t("financial_impact")}</p>
     </div>

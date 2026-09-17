@@ -52,31 +52,6 @@ export default function SchemeReference() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-base font-semibold text-slate-800 mb-4">{t("scheme_terms")}</h2>
-          <ol className="space-y-3 list-decimal list-inside">
-            {s.terms[lang].map((term, i) => (
-              <li key={i} className="text-sm text-slate-600 leading-relaxed">{term}</li>
-            ))}
-          </ol>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-base font-semibold text-slate-800 mb-3">
-            {lang === "it" ? "Soglie di Rinnovo" : "Renewal Thresholds"}
-          </h2>
-          <div className={`grid grid-cols-2 ${scheme === "special" ? "md:grid-cols-4" : "md:grid-cols-2"} gap-3 text-sm`}>
-            <Threshold label={lang === "it" ? "Rinnovo Nazionale min." : "National Renewal min."} value={`${s.renewalThresholds.nationalRenewalMin}%`} />
-            <Threshold label={lang === "it" ? "Rinnovo Port-in min." : "Port-in Renewal min."} value={`${s.renewalThresholds.portinRenewalMin}%`} />
-            {scheme === "special" && (
-              <>
-                <Threshold label="T1 Bonus" value={`> ${s.renewalThresholds.t1BonusThreshold}%`} />
-                <Threshold label="T2 Bonus" value={`> ${s.renewalThresholds.t2BonusThreshold}%`} />
-              </>
-            )}
-          </div>
-        </div>
-
         {/* Activation bonus (Special) */}
         {s.bonusAttivazione && (
           <div className="bg-white rounded-xl border border-slate-200 p-6">
@@ -217,6 +192,22 @@ export default function SchemeReference() {
           </div>
         )}
 
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h2 className="text-base font-semibold text-slate-800 mb-3">
+            {lang === "it" ? "Soglie di Rinnovo" : "Renewal Thresholds"}
+          </h2>
+          <div className={`grid grid-cols-2 ${scheme === "special" ? "md:grid-cols-4" : "md:grid-cols-2"} gap-3 text-sm`}>
+            <Threshold label={lang === "it" ? "Rinnovo Nazionale min." : "National Renewal min."} value={`${s.renewalThresholds.nationalRenewalMin}%`} />
+            <Threshold label={lang === "it" ? "Rinnovo Port-in min." : "Port-in Renewal min."} value={`${s.renewalThresholds.portinRenewalMin}%`} />
+            {scheme === "special" && (
+              <>
+                <Threshold label="T1 Bonus" value={`> ${s.renewalThresholds.t1BonusThreshold}%`} />
+                <Threshold label="T2 Bonus" value={`> ${s.renewalThresholds.t2BonusThreshold}%`} />
+              </>
+            )}
+          </div>
+        </div>
+
         {/* Auto recharge (Normal) */}
         {s.autoRecharge && (
           <div className="bg-white rounded-xl border border-slate-200 p-6">
@@ -236,6 +227,15 @@ export default function SchemeReference() {
             </p>
           </div>
         )}
+
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h2 className="text-base font-semibold text-slate-800 mb-4">{t("scheme_terms")}</h2>
+          <ol className="space-y-3 list-decimal list-inside">
+            {s.terms[lang].map((term, i) => (
+              <li key={i} className="text-sm text-slate-600 leading-relaxed">{term}</li>
+            ))}
+          </ol>
+        </div>
       </div>
     </Layout>
   );

@@ -107,7 +107,7 @@ export default function ActivationSummarySection({ statement }) {
               <span className="text-sm font-bold text-slate-800">{nfmt(a.newActivations.total)}</span>
             </div>
           </div>
-          {a.newActivations.total > 0 && (
+          {statement.scheme !== "special" && a.newActivations.total > 0 && (
             <div className="rounded-md bg-emerald-50/50 border border-emerald-100 p-3">
               <p className="text-xs font-semibold text-emerald-700 uppercase mb-2">{t("earnings_by_threshold")}</p>
               <EarningsRow label={t("new_act_less_6")} qty={a.newActivations.less6} rate={a.newActivations.rateLTE} amount={a.newActivations.earningsLTE} lang={lang} />
