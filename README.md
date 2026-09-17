@@ -71,8 +71,8 @@ What this migration creates:
 | `create_app_profile(p_auth_uid, p_role, …)` RPC | SECURITY-DEFINER, admin-only. Assigns profile + role/scope to an existing Auth user by UUID |
 | `on_auth_user_created` trigger | When Supabase Auth creates a user, auto-insert a `viewer` profile so they can sign in even before the admin touches them |
 
-The admin user-management page manages Auth users through the protected
-`admin-create-user` Edge Function. The function verifies the signed-in admin,
+The admin user-management page manages Auth users through the protected Vercel
+API route at `/api/admin-create-user`. The route verifies the signed-in admin,
 creates confirmed Auth accounts, updates Auth/profile details, and permanently
 removes users when requested. The page also supports reversible profile
 disable/enable for access control.
@@ -104,21 +104,20 @@ select public.create_app_profile(
 That's it. The admin can now sign in at `/login` and access `/users` to create
 and manage other team members.
 
-### Step 3e — Deploy the admin user function
+### Step 3e — Configure admin API secrets in Vercel
 
-The function needs the Supabase project secrets and must never be deployed to
-the frontend bundle. From the repository root, link the Supabase project and
-deploy it:
+The admin API runs as a Vercel serverless function and must never expose the
+service-role key to the frontend. In Vercel project settings, add these
+Production environment variables, then redeploy:
 
-```bash
-supabase login
-supabase link --project-ref <PROJECT_REF>
-supabase functions deploy admin-create-user
+```dotenv
+SUPABASE_URL=https://xxxxxxxxxxxxxxxx.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOi...your-anon-key...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...your-service-role-key...
 ```
 
-`SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` are
-provided automatically by Supabase Edge Functions. The service-role key is
-used only inside the function and must not be added to `.env.local` or Vercel.
+The service-role key is used only by `/api/admin-create-user`. Never prefix it
+with `VITE_`, commit it, or add it to `.env` files used by the frontend.
 
 ---
 
@@ -179,9 +178,12 @@ Vercel imports directly from your Git provider.
 2. **Framework Preset**: Vite (should be auto-detected).
 3. **Build Command**: `npm run build` (default for Vite — leave it).
 4. **Output Directory**: `dist` (default — leave it).
-5. **Environment Variables** — paste BOTH vars from `.env.local`:
+5. **Environment Variables** — add the frontend and server variables:
    - `VITE_SUPABASE_URL` = `https://…supabase.co`
    - `VITE_SUPABASE_ANON_KEY` = `eyJhbGciOi…`
+   - `SUPABASE_URL` = `https://…supabase.co`
+   - `SUPABASE_ANON_KEY` = `eyJhbGciOi…`
+   - `SUPABASE_SERVICE_ROLE_KEY` = the secret service-role key
 6. Click **Deploy**.
 
 ### 6c — Whitelist the Vercel domain in Supabase Auth

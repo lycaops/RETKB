@@ -31,5 +31,5 @@ Start with `README.md` for local setup, Supabase migration steps, env vars, and 
 - The migration creates an SECURITY-DEFINER RPC `create_app_profile()`; only admins can call it (guarded by `public.is_admin()` check inside the function).
 - `retailer_incentives` columns are snake_cased in Postgres; `SNAKE_TO_DISPLAY` in AppContext.jsx maps them back to the original display names used by statement/calculator components.
 - Row-Level Security is enabled on all tables. Policies: admins get full access; `branch_user`/`zone_user` are scoped to their branch/zone; `viewer` can read everything.
-- Directly deleting `auth.users` rows from the browser client requires the `service_role` key, which never ships to the frontend. The User Management page uses the protected `admin-create-user` Edge Function for create, edit, and permanent removal; profile disable/enable remains available for reversible access control.
+- Directly deleting `auth.users` rows from the browser client requires the `service_role` key, which never ships to the frontend. The User Management page uses the protected Vercel API route `api/admin-create-user.js` for create, edit, and permanent removal; profile disable/enable remains available for reversible access control.
 - Run `npm run lint` and `npm run build` before finishing code changes.

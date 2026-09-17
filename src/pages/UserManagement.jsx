@@ -40,6 +40,25 @@ const roleBadge = (role) => {
   }
 };
 
+const invokeAdminApi = async (body) => {
+  const { data, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) throw sessionError;
+  const accessToken = data?.session?.access_token;
+  if (!accessToken) throw new Error("Your session has expired. Please sign in again.");
+
+  const response = await fetch("/api/admin-create-user", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result?.error || "Admin user operation failed.");
+  return result;
+};
+
 export default function UserManagement() {
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
@@ -182,31 +201,25 @@ export default function UserManagement() {
     setSuccess("");
     try {
       if (editingId) {
-        const { error: functionErr } = await supabase.functions.invoke("admin-create-user", {
-          body: {
-            action: "update",
-            user_id: editingId,
-            email: form.email.trim(),
-            full_name: form.full_name.trim() || null,
-            role: form.role,
-            branch_id: form.branch_id || null,
-            zone_id: form.zone_id || null,
-          },
+        await invokeAdminApi({
+          action: "update",
+          user_id: editingId,
+          email: form.email.trim(),
+          full_name: form.full_name.trim() || null,
+          role: form.role,
+          branch_id: form.branch_id || null,
+          zone_id: form.zone_id || null,
         });
-        if (functionErr) throw functionErr;
         setSuccess("User updated successfully.");
       } else {
-        const { error: functionErr } = await supabase.functions.invoke("admin-create-user", {
-          body: {
-            email: form.email.trim(),
-            password: form.password,
-            full_name: form.full_name.trim() || null,
-            role: form.role,
-            branch_id: form.branch_id || null,
-            zone_id: form.zone_id || null,
-          },
+        await invokeAdminApi({
+          email: form.email.trim(),
+          password: form.password,
+          full_name: form.full_name.trim() || null,
+          role: form.role,
+          branch_id: form.branch_id || null,
+          zone_id: form.zone_id || null,
         });
-        if (functionErr) throw functionErr;
         setSuccess("User created and profile assigned successfully.");
       }
       resetForm();
@@ -219,9 +232,6 @@ export default function UserManagement() {
           message = details?.error || message;
         } catch {
         }
-      }
-      if (message === "Failed to send a request to the Edge Function") {
-        message = "The admin-create-user Edge Function is unavailable. Deploy it to the same Supabase project as this app, then try again.";
       }
       setError(message);
     } finally {
@@ -236,10 +246,7 @@ export default function UserManagement() {
     setError("");
     setSuccess("");
     try {
-      const { error: functionErr } = await supabase.functions.invoke("admin-create-user", {
-        body: { action: "delete", user_id: row.id },
-      });
-      if (functionErr) throw functionErr;
+      await invokeAdminApi({ action: "delete", user_id: row.id });
       setSuccess("User removed successfully.");
       await loadAll();
     } catch (e) {
@@ -261,11 +268,11 @@ export default function UserManagement() {
     const verb = row.is_disabled ? "Enable" : "Disable";
     if (!window.confirm(`${verb} user ${row.email || row.id}?`)) return;
     try {
-      const { error: e } = await supabase
-        .from("profiles")
-        .update({ is_disabled: !row.is_disabled })
-        .eq("id", row.id);
-      if (e) throw e;
+      await invokeAdminApi({
+        action: "disable",
+        user_id: row.id,
+        is_disabled: !row.is_disabled,
+      });
       setSuccess(`User ${verb.toLowerCase()}d.`);
       await loadAll();
     } catch (err) {
