@@ -4,8 +4,8 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
   return (
     <div className="min-h-screen bg-[#f4f7fb] flex items-stretch">
       <div className="hidden lg:flex lg:w-[45%] xl:w-1/2 bg-[#21264e] relative overflow-hidden p-12 xl:p-16 flex-col justify-between">
-        <img src="/h2.svg" alt="" aria-hidden="true" className="absolute -right-28 -top-28 h-80 w-80 opacity-20" />
-        <img src="/h1.svg" alt="" aria-hidden="true" className="absolute -bottom-32 -left-20 h-96 w-96 opacity-[.15]" />
+        <img src="/h2.svg" alt="" aria-hidden="true" className="absolute -right-36 -top-8 h-96 w-96 opacity-20" />
+        <img src="/h1.svg" alt="" aria-hidden="true" className="absolute -bottom-40 -left-28 h-[28rem] w-[28rem] opacity-[.15]" />
         <div className="relative">
           <img src="/logo.png" alt="Retailer Incentive Statement" className="h-10 w-auto" />
           <div className="mt-24 max-w-md">
