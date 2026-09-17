@@ -16,6 +16,7 @@ import {
   MapPin,
   X,
   Save,
+  Trash2,
 } from "lucide-react";
 
 const ROLES = [
@@ -181,17 +182,18 @@ export default function UserManagement() {
     setSuccess("");
     try {
       if (editingId) {
-        const payload = {
-          role: form.role,
-          branch_id: form.branch_id || null,
-          zone_id: form.zone_id || null,
-        };
-        if (form.full_name.trim()) payload.full_name = form.full_name.trim();
-        const { error: updErr } = await supabase
-          .from("profiles")
-          .update(payload)
-          .eq("id", editingId);
-        if (updErr) throw updErr;
+        const { error: functionErr } = await supabase.functions.invoke("admin-create-user", {
+          body: {
+            action: "update",
+            user_id: editingId,
+            email: form.email.trim(),
+            full_name: form.full_name.trim() || null,
+            role: form.role,
+            branch_id: form.branch_id || null,
+            zone_id: form.zone_id || null,
+          },
+        });
+        if (functionErr) throw functionErr;
         setSuccess("User updated successfully.");
       } else {
         const { error: functionErr } = await supabase.functions.invoke("admin-create-user", {
@@ -220,6 +222,34 @@ export default function UserManagement() {
       }
       if (message === "Failed to send a request to the Edge Function") {
         message = "The admin-create-user Edge Function is unavailable. Deploy it to the same Supabase project as this app, then try again.";
+      }
+      setError(message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const deleteUser = async (row) => {
+    if (row.id === user?.id) return;
+    if (!window.confirm(`Permanently remove ${row.email || row.id}? This cannot be undone.`)) return;
+    setSubmitting(true);
+    setError("");
+    setSuccess("");
+    try {
+      const { error: functionErr } = await supabase.functions.invoke("admin-create-user", {
+        body: { action: "delete", user_id: row.id },
+      });
+      if (functionErr) throw functionErr;
+      setSuccess("User removed successfully.");
+      await loadAll();
+    } catch (e) {
+      let message = e?.message || "Failed to remove user.";
+      if (e?.context instanceof Response) {
+        try {
+          const details = await e.context.json();
+          message = details?.error || message;
+        } catch {
+        }
       }
       setError(message);
     } finally {
@@ -282,8 +312,8 @@ export default function UserManagement() {
         <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 flex gap-2 text-sm text-amber-800">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <div className="leading-relaxed">
-            New users are created in Supabase Auth and assigned their application profile automatically. Hard-delete
-            Auth users via the Supabase Dashboard; here you can soft-disable their profile.
+            New users are created in Supabase Auth and assigned their application profile automatically. You can
+            edit, disable, enable, or permanently remove users from this page.
           </div>
         </div>
 
@@ -540,6 +570,7 @@ export default function UserManagement() {
                           {!isSelf && (
                             <button
                               onClick={() => toggleDisable(u)}
+                              disabled={submitting}
                               className={`inline-flex items-center gap-1 text-xs font-medium hover:underline ${
                                 u.is_disabled ? "text-emerald-600" : "text-red-500"
                               }`}
@@ -549,6 +580,15 @@ export default function UserManagement() {
                               ) : (
                                 <><Ban className="w-3 h-3" /> Disable</>
                               )}
+                            </button>
+                          )}
+                          {!isSelf && (
+                            <button
+                              onClick={() => deleteUser(u)}
+                              disabled={submitting}
+                              className="inline-flex items-center gap-1 text-xs font-medium text-red-700 hover:underline disabled:opacity-50"
+                            >
+                              <Trash2 className="w-3 h-3" /> Remove
                             </button>
                           )}
                         </td>

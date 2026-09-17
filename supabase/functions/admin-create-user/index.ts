@@ -60,9 +60,62 @@ Deno.serve(async (request) => {
   const email = typeof payload.email === "string" ? payload.email.trim().toLowerCase() : "";
   const password = typeof payload.password === "string" ? payload.password : "";
   const fullName = typeof payload.full_name === "string" ? payload.full_name.trim() : null;
+  const action = typeof payload.action === "string" ? payload.action : "create";
+  const userId = typeof payload.user_id === "string" ? payload.user_id : "";
   const role = typeof payload.role === "string" ? payload.role : "viewer";
   const branchId = typeof payload.branch_id === "string" && payload.branch_id ? payload.branch_id : null;
   const zoneId = typeof payload.zone_id === "string" && payload.zone_id ? payload.zone_id : null;
+
+  if (action === "delete") {
+    if (!userId || userId === callerData.user.id) {
+      return json({ error: "valid_non_self_user_id_required" }, 400);
+    }
+
+    const { error: deleteError } = await adminClient.auth.admin.deleteUser(userId);
+    if (deleteError) {
+      return json({ error: deleteError.message || "user_deletion_failed" }, 400);
+    }
+    return json({ deleted: true, user_id: userId });
+  }
+
+  if (action === "update") {
+    if (!userId) {
+      return json({ error: "user_id_required" }, 400);
+    }
+    if (!email || !email.includes("@")) {
+      return json({ error: "valid_email_required" }, 400);
+    }
+    if (!["admin", "branch_user", "zone_user", "viewer"].includes(role)) {
+      return json({ error: "invalid_role" }, 400);
+    }
+    if (role === "branch_user" && !branchId) {
+      return json({ error: "branch_required" }, 400);
+    }
+    if (role === "zone_user" && !zoneId) {
+      return json({ error: "zone_required" }, 400);
+    }
+
+    const { error: authUpdateError } = await adminClient.auth.admin.updateUserById(userId, {
+      email,
+      user_metadata: fullName ? { full_name: fullName } : {},
+    });
+    if (authUpdateError) {
+      return json({ error: authUpdateError.message || "user_update_failed" }, 400);
+    }
+
+    const { error: profileUpdateError } = await adminClient
+      .from("profiles")
+      .update({ email, full_name: fullName, role, branch_id: branchId, zone_id: zoneId })
+      .eq("id", userId);
+    if (profileUpdateError) {
+      return json({ error: profileUpdateError.message || "profile_update_failed" }, 500);
+    }
+    return json({ updated: true, user_id: userId });
+  }
+
+  if (action !== "create") {
+    return json({ error: "invalid_action" }, 400);
+  }
 
   if (!email || !email.includes("@") || password.length < 6) {
     return json({ error: "valid_email_and_password_required" }, 400);

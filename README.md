@@ -71,10 +71,11 @@ What this migration creates:
 | `create_app_profile(p_auth_uid, p_role, …)` RPC | SECURITY-DEFINER, admin-only. Assigns profile + role/scope to an existing Auth user by UUID |
 | `on_auth_user_created` trigger | When Supabase Auth creates a user, auto-insert a `viewer` profile so they can sign in even before the admin touches them |
 
-The admin user-management page creates new Auth users through the protected
+The admin user-management page manages Auth users through the protected
 `admin-create-user` Edge Function. The function verifies the signed-in admin,
-creates the confirmed Auth account, and upserts its application profile with the
-selected role and branch/zone scope.
+creates confirmed Auth accounts, updates Auth/profile details, and permanently
+removes users when requested. The page also supports reversible profile
+disable/enable for access control.
 
 ### Step 3c — Insert branches & zones
 
@@ -297,7 +298,7 @@ Logged in as an admin, visit **Users** (`/users`) in the left sidebar.
 
 **To edit an existing user**: click **Edit** on their row → change role / branch / zone → **Save Changes**.
 
-**To remove access**: click **Disable**. The user stays in Supabase Auth but their profile is soft-disabled (all policies reject). To permanently delete, go to **Authentication → Users** in the Supabase Dashboard → Delete.
+**To remove access**: click **Disable**. The user stays in Supabase Auth but their profile is soft-disabled (all policies reject). To permanently delete the Auth user and profile, click **Remove** and confirm.
 
 ---
 
