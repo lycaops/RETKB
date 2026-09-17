@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useApp } from "@/lib/AppContext";
 import { calcSpecialNew, SPECIAL_PLAN_BONUSES } from "@/lib/calculatorLogic";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 
 function fmt(n) { return `€${n.toFixed(2)}`; }
 
-export default function SpecialNewCalculator() {
+const SpecialNewCalculator = forwardRef(function SpecialNewCalculator({ onResult }, ref) {
   const { lang } = useApp();
   const [entries, setEntries] = useState([{ bonus: "3.00", qty: "" }]);
   const [t1, setT1] = useState(0);
@@ -27,8 +27,12 @@ export default function SpecialNewCalculator() {
 
   const calculate = () => {
     const parsed = entries.map((e) => ({ bonus: Number(e.bonus) || 0, qty: Number(e.qty) || 0 }));
-    setResult(calcSpecialNew(parsed, Number(t1) || 0, Number(t2) || 0));
+    const nextResult = calcSpecialNew(parsed, Number(t1) || 0, Number(t2) || 0);
+    setResult(nextResult);
+    onResult?.(nextResult);
   };
+
+  useImperativeHandle(ref, () => ({ calculate }), [calculate]);
 
   return (
     <div className="space-y-4">
@@ -65,7 +69,6 @@ export default function SpecialNewCalculator() {
         </div>
       </div>
 
-      <Button onClick={calculate} className="w-full" style={{ backgroundColor: "#08dc7d", color: "#21264e" }}>{lang === "it" ? "Calcola Guadagni" : "Calculate Earnings"}</Button>
 
       {result && (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 space-y-2">
@@ -82,4 +85,6 @@ export default function SpecialNewCalculator() {
       )}
     </div>
   );
-}
+});
+
+export default SpecialNewCalculator;

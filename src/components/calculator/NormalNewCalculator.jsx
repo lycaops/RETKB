@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useApp } from "@/lib/AppContext";
 import { calcNormalNew, getTierLabel } from "@/lib/calculatorLogic";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 function fmt(n) { return `€${n.toFixed(2)}`; }
 
-export default function NormalNewCalculator() {
+const NormalNewCalculator = forwardRef(function NormalNewCalculator({ onResult }, ref) {
   const { lang } = useApp();
   const [qtyLTE, setQtyLTE] = useState(0);
   const [qtyGT, setQtyGT] = useState(0);
@@ -15,7 +14,13 @@ export default function NormalNewCalculator() {
   const [result, setResult] = useState(null);
 
   const total = (Number(qtyLTE) || 0) + (Number(qtyGT) || 0);
-  const calculate = () => { setResult(calcNormalNew(Number(qtyLTE) || 0, Number(qtyGT) || 0, withRecharge, withMargin)); };
+  const calculate = () => {
+    const nextResult = calcNormalNew(Number(qtyLTE) || 0, Number(qtyGT) || 0, withRecharge, withMargin);
+    setResult(nextResult);
+    onResult?.(nextResult);
+  };
+
+  useImperativeHandle(ref, () => ({ calculate }), [calculate]);
 
   return (
     <div className="space-y-4">
@@ -45,7 +50,6 @@ export default function NormalNewCalculator() {
         <input type="checkbox" checked={withMargin} onChange={(e) => setWithMargin(e.target.checked)} className="rounded" />
         {lang === "it" ? "Margine SIM (€5/SIM)" : "SIM Margin (€5/SIM)"}
       </label>
-      <Button onClick={calculate} className="w-full" style={{ backgroundColor: "#08dc7d", color: "#21264e" }}>{lang === "it" ? "Calcola Guadagni" : "Calculate Earnings"}</Button>
       {result && (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 space-y-2">
           <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">{lang === "it" ? "Riepilogo Guadagni" : "Earnings Breakdown"}</p>
@@ -58,4 +62,6 @@ export default function NormalNewCalculator() {
       )}
     </div>
   );
-}
+});
+
+export default NormalNewCalculator;

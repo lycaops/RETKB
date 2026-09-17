@@ -1,19 +1,24 @@
-import React, { useState } from "react";
+import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useApp } from "@/lib/AppContext";
 import { calcSpecialMnp } from "@/lib/calculatorLogic";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 function fmt(n) { return `\u20ac${n.toFixed(2)}`; }
 
-export default function SpecialMnpCalculator() {
+const SpecialMnpCalculator = forwardRef(function SpecialMnpCalculator({ onResult }, ref) {
   const { lang } = useApp();
   const [planType, setPlanType] = useState("lte");
   const [count, setCount] = useState(10);
   const [garaOp, setGaraOp] = useState("40");
   const [result, setResult] = useState(null);
 
-  const calculate = () => { setResult(calcSpecialMnp(planType, Number(count) || 0, Number(garaOp) || 0)); };
+  const calculate = () => {
+    const nextResult = calcSpecialMnp(planType, Number(count) || 0, Number(garaOp) || 0);
+    setResult(nextResult);
+    onResult?.(nextResult);
+  };
+
+  useImperativeHandle(ref, () => ({ calculate }), [calculate]);
 
   const premiumLabel = lang === "it" ? "Premium (Iliad/Fastweb/CoopVoce/PosteMobile) +\u20ac40" : "Premium (Iliad/Fastweb/CoopVoce/PosteMobile) +\u20ac40";
   const otherLabel = lang === "it" ? "Altri MNO/MVNO +\u20ac20" : "Other MNO/MVNO +\u20ac20";
@@ -49,7 +54,6 @@ export default function SpecialMnpCalculator() {
       <p className="text-xs text-amber-600 rounded-md bg-amber-50 border-l-4 border-amber-400 p-2.5">
         {"\u23f1"} {lang === "it" ? "Il bonus MNP viene accreditato dopo 60 giorni, con uso continuato e rinnovo (minimo 6 mesi)." : "MNP activation bonus is credited after 60 days, subject to continuous use & renewal (minimum 6 months)."}
       </p>
-      <Button onClick={calculate} className="w-full" style={{ backgroundColor: "#08dc7d", color: "#21264e" }}>{lang === "it" ? "Calcola Guadagni" : "Calculate Earnings"}</Button>
       {result && (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 space-y-2">
           <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">{lang === "it" ? "Riepilogo Guadagni" : "Earnings Breakdown"}</p>
@@ -60,4 +64,6 @@ export default function SpecialMnpCalculator() {
       )}
     </div>
   );
-}
+});
+
+export default SpecialMnpCalculator;

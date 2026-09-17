@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useApp } from "@/lib/AppContext";
 import { calcNormalMnp, getTierLabel } from "@/lib/calculatorLogic";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 function fmt(n) { return `€${n.toFixed(2)}`; }
 
-export default function NormalMnpCalculator() {
+const NormalMnpCalculator = forwardRef(function NormalMnpCalculator({ onResult }, ref) {
   const { lang } = useApp();
   const [qtyLTE, setQtyLTE] = useState(0);
   const [qtyGT, setQtyGT] = useState(0);
@@ -18,7 +17,13 @@ export default function NormalMnpCalculator() {
 
   const total = (Number(qtyLTE) || 0) + (Number(qtyGT) || 0);
   const garaEligible = total >= 15;
-  const calculate = () => { setResult(calcNormalMnp(Number(qtyLTE) || 0, Number(qtyGT) || 0, Number(garaPremium) || 0, Number(garaOther) || 0, withRecharge, withMargin)); };
+  const calculate = () => {
+    const nextResult = calcNormalMnp(Number(qtyLTE) || 0, Number(qtyGT) || 0, Number(garaPremium) || 0, Number(garaOther) || 0, withRecharge, withMargin);
+    setResult(nextResult);
+    onResult?.(nextResult);
+  };
+
+  useImperativeHandle(ref, () => ({ calculate }), [calculate]);
 
   return (
     <div className="space-y-4">
@@ -62,7 +67,6 @@ export default function NormalMnpCalculator() {
         {lang === "it" ? "Margine SIM (€5/SIM)" : "SIM Margin (€5/SIM)"}
       </label>
       <p className="text-xs text-amber-600 rounded-md bg-amber-50 border-l-4 border-amber-400 p-2.5">{lang === "it" ? "⏱ Gli incentivi MNP vengono accreditati dopo 60 giorni, con uso continuativo e rinnovo (minimo 6 mesi)." : "⏱ MNP incentives are credited after 60 days, subject to continuous use & renewal (minimum 6 months)."}</p>
-      <Button onClick={calculate} className="w-full" style={{ backgroundColor: "#08dc7d", color: "#21264e" }}>{lang === "it" ? "Calcola Guadagni" : "Calculate Earnings"}</Button>
       {result && (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 space-y-2">
           {result.garaError ? (
@@ -84,4 +88,6 @@ export default function NormalMnpCalculator() {
       )}
     </div>
   );
-}
+});
+
+export default NormalMnpCalculator;
