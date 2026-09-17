@@ -1,22 +1,11 @@
 import React from 'react';
 
-function HeartShape({ className, fill = 'currentColor', opacity = 1 }) {
-  return (
-    <svg viewBox="0 0 200 200" className={className} fill={fill} opacity={opacity} aria-hidden="true">
-      <path d="M100 180C90 170 24 119 12 81C-2 46 15 15 48 17C70 18 86 35 100 55C114 35 130 18 152 17C185 15 202 46 188 81C176 119 110 170 100 180Z" />
-    </svg>
-  );
-}
-
 export default function AuthLayout({ icon: Icon, title, subtitle, footer, children }) {
   return (
     <div className="min-h-screen bg-[#f4f7fb] flex items-stretch">
       <div className="hidden lg:flex lg:w-[45%] xl:w-1/2 bg-[#21264e] relative overflow-hidden p-12 xl:p-16 flex-col justify-between">
-        <div className="absolute -right-28 -top-28 h-80 w-80 rounded-full border-[32px] border-[#006ae0]/20" />
-        <div className="absolute -bottom-32 -left-20 h-96 w-96 rounded-full border-[48px] border-[#00a6a6]/15" />
-        <HeartShape className="absolute right-12 top-10 h-28 w-28 text-[#f06aa6]/20" />
-        <HeartShape className="absolute left-10 bottom-16 h-36 w-36 text-[#6ec7d4]/15" />
-        <HeartShape className="absolute right-1/3 top-1/3 h-16 w-16 text-[#f6d6e8]/20" />
+        <img src="/h2.svg" alt="" aria-hidden="true" className="absolute -right-28 -top-28 h-80 w-80 opacity-20" />
+        <img src="/h1.svg" alt="" aria-hidden="true" className="absolute -bottom-32 -left-20 h-96 w-96 opacity-[.15]" />
         <div className="relative">
           <img src="/logo.png" alt="Retailer Incentive Statement" className="h-10 w-auto" />
           <div className="mt-24 max-w-md">
