@@ -42,7 +42,7 @@ export default function Home() {
   const branches = useMemo(() => {
     const set = new Set();
     for (const r of records) {
-      const b = getText(r, 'BRANCH');
+      const b = getText(r, 'ACCMGRID');
       if (b) set.add(b);
     }
     return Array.from(set).sort();
@@ -51,7 +51,7 @@ export default function Home() {
   const zones = useMemo(() => {
     const set = new Set();
     for (const r of records) {
-      const z = getText(r, 'ZONE');
+      const z = getText(r, 'HOTSPOTID');
       if (z) set.add(z);
     }
     return Array.from(set).sort();
@@ -59,8 +59,8 @@ export default function Home() {
 
   const filtered = useMemo(() => {
     return records.filter((r) => {
-      if (branchFilter && getText(r, 'BRANCH') !== branchFilter) return false;
-      if (zoneFilter && getText(r, 'ZONE') !== zoneFilter) return false;
+      if (branchFilter && getText(r, 'ACCMGRID') !== branchFilter) return false;
+      if (zoneFilter && getText(r, 'HOTSPOTID') !== zoneFilter) return false;
       if (!query.trim()) return true;
       const q = query.trim().toLowerCase();
       const id = getText(r, 'RETAILER ID').toLowerCase();

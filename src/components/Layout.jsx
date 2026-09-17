@@ -14,8 +14,7 @@ import {
   User as UserIcon,
 } from 'lucide-react';
 
-const LOGO_URL =
-  'https://cms-assets.ldsvcplatform.com/IT/s3fs-public/2023-09/home_logo.png';
+const LOGO_URL = '/logo.png';
 
 export default function Layout({ children }) {
   const { t, lang, setLang, scheme, setScheme } = useApp();
@@ -57,8 +56,8 @@ export default function Layout({ children }) {
       >
         <div className="px-6 py-6 border-b border-white/10">
           <img
-            src="https://media.db.com/images/public/6aa2c3fb5065989f0ef55b2f/626dff52f_logo_br_italy-svg.png"
-            alt="LycaMobile"
+            src="/logo.png"
+            alt="Logo"
             crossOrigin="anonymous"
             className="h-8"
           />
@@ -96,7 +95,7 @@ export default function Layout({ children }) {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0">
           <div className="flex items-center gap-3">
-            <img src={LOGO_URL} alt="LycaMobile" crossOrigin="anonymous" className="h-7 md:hidden" />
+            <img src={LOGO_URL} alt="Logo" crossOrigin="anonymous" className="h-7 md:hidden" />
             <h1 className="text-lg font-semibold text-slate-800">{t('appTitle')}</h1>
           </div>
           <div className="flex items-center gap-3">

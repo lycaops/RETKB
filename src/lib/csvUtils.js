@@ -39,7 +39,7 @@ export const NUMERIC_FIELDS = [
 ];
 
 export const IDENTITY_FIELDS = ["RETAILER ID", "ACCMGRID", "HOTSPOTID"];
-export const TEXT_FIELDS = ["MONTH", "PAYMENT MOOD", "BRANCH", "ZONE", "INCENTIVE GROUP"];
+export const TEXT_FIELDS = ["MONTH", "PAYMENT MOOD", "INCENTIVE GROUP"];
 
 function norm(s) {
   return String(s).toLowerCase().replace(/[\s_]+/g, "");

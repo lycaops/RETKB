@@ -45,8 +45,6 @@ export const SNAKE_TO_DISPLAY = {
   t2_renewal: 'T2 RENEWAL',
   incentive_group: 'INCENTIVE GROUP',
   fake_port_out_pct: 'FAKE PORT OUT %',
-  branch: 'BRANCH',
-  zone: 'ZONE',
 };
 
 export const DISPLAY_TO_SNAKE = Object.fromEntries(
@@ -93,17 +91,12 @@ export function AppProvider({ children }) {
         if (error) throw error;
         mapped = (data || []).map((r) => {
           const display = toDisplayRow(r);
+          const rawGroup = r.incentive_group || 'special';
           const incentiveGroup =
-            getText(display, 'INCENTIVE GROUP') ||
-            r.incentive_group ||
-            (r.scheme === 'normal' ? 'NOR_RET' : 'SPL_RET');
-          const derivedScheme =
-            r.scheme ||
-            (incentiveGroup === 'NOR_RET'
-              ? 'normal'
-              : incentiveGroup === 'SPL_RET'
-                ? 'special'
-                : 'special');
+            rawGroup === 'NOR_RET' ? 'normal' :
+            rawGroup === 'SPL_RET' ? 'special' :
+            rawGroup;
+          const derivedScheme = incentiveGroup === 'normal' ? 'normal' : 'special';
           return {
             ...display,
             _id: r.id,

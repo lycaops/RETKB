@@ -70,7 +70,6 @@ create table if not exists public.retailer_incentives (
   month text not null,
   payment_mood text,
   incentive_group text check (incentive_group in ('NOR_RET','SPL_RET')),
-  scheme text check (scheme in ('normal','special')) default 'special',
 
   -- Activation & topup counts
   total_noofactivations numeric,
@@ -119,12 +118,6 @@ create table if not exists public.retailer_incentives (
   -- Additional metrics
   fake_port_out_pct numeric,
 
-  -- Scope columns (for branch/zone RBAC)
-  branch text,
-  zone text,
-  branch_id uuid references public.branches(id) on delete set null,
-  zone_id uuid references public.zones(id) on delete set null,
-
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -134,10 +127,9 @@ create table if not exists public.retailer_incentives (
 -- ---------------------------------------------------------------------
 create index if not exists ri_retailer_idx on public.retailer_incentives(retailer_id);
 create index if not exists ri_month_idx    on public.retailer_incentives(month);
-create index if not exists ri_branch_idx   on public.retailer_incentives(branch_id);
-create index if not exists ri_zone_idx     on public.retailer_incentives(zone_id);
+create index if not exists ri_accmgrid_idx on public.retailer_incentives(accmgrid);
+create index if not exists ri_hotspotid_idx on public.retailer_incentives(hotspotid);
 create index if not exists ri_group_idx    on public.retailer_incentives(incentive_group);
-create index if not exists ri_scope_text_idx on public.retailer_incentives(branch, zone);
 
 -- ---------------------------------------------------------------------
 -- 4. Helper: is_admin(auth_uid) — defined AFTER the profiles table
@@ -250,11 +242,13 @@ create policy "ri: branch scoped read"
     (select role from public.profiles where id = auth.uid() and not is_disabled) = 'branch_user'
     and
     (
-      branch_id = (select branch_id from public.profiles where id = auth.uid())
+      accmgrid = (select b.name from public.branches b
+                   join public.profiles p on p.branch_id = b.id
+                  where p.id = auth.uid())
       or
-      branch = (select b.name from public.branches b
-                 join public.profiles p on p.branch_id = b.id
-                where p.id = auth.uid())
+      accmgrid = (select b.code from public.branches b
+                   join public.profiles p on p.branch_id = b.id
+                  where p.id = auth.uid())
     )
   );
 
@@ -266,11 +260,13 @@ create policy "ri: zone scoped read"
     (select role from public.profiles where id = auth.uid() and not is_disabled) = 'zone_user'
     and
     (
-      zone_id = (select zone_id from public.profiles where id = auth.uid())
+      hotspotid = (select z.name from public.zones z
+                    join public.profiles p on p.zone_id = z.id
+                   where p.id = auth.uid())
       or
-      zone = (select z.name from public.zones z
-               join public.profiles p on p.zone_id = z.id
-              where p.id = auth.uid())
+      hotspotid = (select z.code from public.zones z
+                    join public.profiles p on p.zone_id = z.id
+                   where p.id = auth.uid())
     )
   );
 

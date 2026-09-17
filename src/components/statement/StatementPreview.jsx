@@ -10,7 +10,7 @@ import { UsageSection, PortOutSection } from "./UsagePortOutSection";
 import InsightsSection from "./InsightsSection";
 import StatementCharts from "./StatementCharts";
 
-const LOGO_URL = "https://cms-assets.ldsvcplatform.com/IT/s3fs-public/2023-09/home_logo.png";
+const LOGO_URL = "/logo.png";
 
 function SectionTitle({ children, color }) {
   return (
@@ -31,7 +31,7 @@ const StatementPreview = forwardRef(({ row }, ref) => {
       {/* Section 1: header + summary + breakdown (first page) */}
       <div data-pdf-section>
         <div className="px-8 py-6 flex items-center justify-between" style={{ backgroundColor: "#21264e" }}>
-          <img src="https://media.db.com/images/public/6aa2c3fb5065989f0ef55b2f/626dff52f_logo_br_italy-svg.png" alt="LycaMobile" crossOrigin="anonymous" className="h-9" />
+          <img src="/logo.png" alt="Logo" crossOrigin="anonymous" className="h-9" />
           <div className="text-right text-white">
             <p className="text-xs uppercase tracking-widest text-white/60">{t("appSubtitle")}</p>
             <p className="text-sm font-semibold">{t("retailer_incentive_statement")}</p>
@@ -86,7 +86,7 @@ const StatementPreview = forwardRef(({ row }, ref) => {
           </div>
           <div className="mt-4 pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs text-slate-400">{t("footer_support")}: <span className="text-[#006AE0] font-medium">{t("footer_email")}</span></p>
-            <img src={LOGO_URL} alt="LycaMobile" crossOrigin="anonymous" className="h-6" />
+            <img src={LOGO_URL} alt="Logo" crossOrigin="anonymous" className="h-6" />
           </div>
         </div>
       </div>
