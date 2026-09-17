@@ -210,7 +210,18 @@ export default function UserManagement() {
       resetForm();
       await loadAll();
     } catch (e) {
-      setError(e?.message || "Failed to save.");
+      let message = e?.message || "Failed to save.";
+      if (e?.context instanceof Response) {
+        try {
+          const details = await e.context.json();
+          message = details?.error || message;
+        } catch {
+        }
+      }
+      if (message === "Failed to send a request to the Edge Function") {
+        message = "The admin-create-user Edge Function is unavailable. Deploy it to the same Supabase project as this app, then try again.";
+      }
+      setError(message);
     } finally {
       setSubmitting(false);
     }
