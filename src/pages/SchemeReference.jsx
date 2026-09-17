@@ -93,36 +93,6 @@ export default function SchemeReference() {
           </div>
         )}
 
-        {/* Reduced incentive table (Normal) */}
-        {s.reducedIncentiveTable && (
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h2 className="text-base font-semibold text-slate-800 mb-3">{t("scheme_reduced_renewal")}</h2>
-            <p className="text-xs text-slate-500 mb-3">
-              {lang === "it"
-                ? "Se il rinnovo nazionale (T1) è <30% o il rinnovo port-in è <50%, si applica un incentivo ridotto."
-                : "If national renewal (T1) is <30% or port-in renewal is <50%, a reduced incentive applies."}
-            </p>
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ backgroundColor: "#21264e" }} className="text-white">
-                  {s.reducedIncentiveTable.headers[lang].map((h, i) => (
-                    <th key={i} className="text-left px-4 py-2 font-medium">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {s.reducedIncentiveTable.rows.map((r, i) => (
-                  <tr key={i} className="border-t border-slate-100">
-                    <td className="px-4 py-2 text-slate-700">{r.label[lang]}</td>
-                    <td className="px-4 py-2 text-[#006AE0] font-semibold">€{r.portin}</td>
-                    <td className="px-4 py-2 text-[#006AE0] font-semibold">€{r.newAct}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
         {/* MNP / Activation commission */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
           <h2 className="text-base font-semibold text-slate-800 mb-3">{t("scheme_mnp_commission")}</h2>
@@ -207,6 +177,36 @@ export default function SchemeReference() {
             )}
           </div>
         </div>
+
+        {/* Reduced incentive table (Normal) */}
+        {s.reducedIncentiveTable && (
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <h2 className="text-base font-semibold text-slate-800 mb-3">{t("scheme_reduced_renewal")}</h2>
+            <p className="text-xs text-slate-500 mb-3">
+              {lang === "it"
+                ? "Se il rinnovo nazionale (T1) è <30% o il rinnovo port-in è <50%, si applica un incentivo ridotto."
+                : "If national renewal (T1) is <30% or port-in renewal is <50%, a reduced incentive applies."}
+            </p>
+            <table className="w-full text-sm">
+              <thead>
+                <tr style={{ backgroundColor: "#21264e" }} className="text-white">
+                  {s.reducedIncentiveTable.headers[lang].map((h, i) => (
+                    <th key={i} className="text-left px-4 py-2 font-medium">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {s.reducedIncentiveTable.rows.map((r, i) => (
+                  <tr key={i} className="border-t border-slate-100">
+                    <td className="px-4 py-2 text-slate-700">{r.label[lang]}</td>
+                    <td className="px-4 py-2 text-[#006AE0] font-semibold">€{r.portin}</td>
+                    <td className="px-4 py-2 text-[#006AE0] font-semibold">€{r.newAct}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Auto recharge (Normal) */}
         {s.autoRecharge && (

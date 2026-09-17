@@ -241,7 +241,8 @@ export default function UserManagement() {
 
   const deleteUser = async (row) => {
     if (row.id === user?.id) return;
-    if (!window.confirm(`Permanently remove ${row.email || row.id}? This cannot be undone.`)) return;
+    const label = row.email || row.full_name || "this user";
+    if (!window.confirm(`Permanently remove ${label}? This cannot be undone.`)) return;
     setSubmitting(true);
     setError("");
     setSuccess("");
@@ -266,7 +267,8 @@ export default function UserManagement() {
 
   const toggleDisable = async (row) => {
     const verb = row.is_disabled ? "Enable" : "Disable";
-    if (!window.confirm(`${verb} user ${row.email || row.id}?`)) return;
+    const label = row.email || row.full_name || "this user";
+    if (!window.confirm(`${verb} user ${label}?`)) return;
     try {
       await invokeAdminApi({
         action: "disable",
@@ -525,9 +527,6 @@ export default function UserManagement() {
                         <td className="px-5 py-3">
                           <div className="font-medium text-slate-800">
                             {u.full_name || <span className="text-slate-400 italic">—</span>}
-                          </div>
-                          <div className="text-[11px] text-slate-400 font-mono truncate max-w-[220px]">
-                            {u.id}
                           </div>
                         </td>
                         <td className="px-5 py-3 text-slate-600">{u.email || "—"}</td>

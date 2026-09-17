@@ -41,7 +41,7 @@ const NormalMnpCalculator = forwardRef(function NormalMnpCalculator({ onResult, 
         <span className="font-bold text-slate-800">{total}</span>
         <span className="text-slate-300">→</span>
         <span className="text-slate-500">{lang === "it" ? "Fascia:" : "Tier:"}</span>
-        <span className="font-bold text-[#08dc7d]">{total > 0 ? getTierLabel(total) : "—"}</span>
+        <span className="font-bold text-[#46286E]">{total > 0 ? getTierLabel(total) : "—"}</span>
         {garaEligible && <span className="ml-auto text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">{lang === "it" ? "GARA SBLOCCATO" : "GARA UNLOCKED"}</span>}
       </div>
       {garaEligible && (

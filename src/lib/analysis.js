@@ -233,7 +233,7 @@ export function computePerformance(row) {
 
   const totalPortouts = getNumber(row, "TOTAL_PORTOUT");
   const portoutDeduction = getNumber(row, "PORTOUT DEDUCTION");
-  const fakePortOutPct = getNumber(row, "FAKE PORT OUT %");
+  const fakePortOutPct = normalizePercent(getNumber(row, "FAKE PORT OUT %"));
   const blockedActivations = getNumber(row, "BLOCKED_NOOFACTIVATIONS");
 
   return {

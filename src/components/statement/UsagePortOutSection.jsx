@@ -50,6 +50,7 @@ export function PortOutSection({ statement }) {
   const p = statement.performance.portout;
   const fmt = (v) => (v === null ? "—" : formatCurrency(v, lang));
   const nfmt = (v) => (v === null ? "—" : v);
+  const pctfmt = (v) => (v === null ? "—" : `${v.toFixed(1)}%`);
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5">
@@ -67,7 +68,7 @@ export function PortOutSection({ statement }) {
         </div>
         <div className="bg-slate-50 rounded-lg p-3">
           <p className="text-xs text-slate-500">Fake port out %</p>
-          <p className="text-lg font-bold text-slate-800 mt-0.5">{p.fakePortOutPct === null ? "—" : `${p.fakePortOutPct}%`}</p>
+          <p className="text-lg font-bold text-slate-800 mt-0.5">{pctfmt(p.fakePortOutPct)}</p>
         </div>
       </div>
       <p className="text-xs text-slate-400 mt-3">{t("financial_impact")}</p>

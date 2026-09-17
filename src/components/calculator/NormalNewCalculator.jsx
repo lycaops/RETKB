@@ -38,7 +38,7 @@ const NormalNewCalculator = forwardRef(function NormalNewCalculator({ onResult, 
         <span className="font-bold text-slate-800">{total}</span>
         <span className="text-slate-300">→</span>
         <span className="text-slate-500">{lang === "it" ? "Fascia:" : "Tier:"}</span>
-        <span className="font-bold text-[#08dc7d]">{total > 0 ? getTierLabel(total) : "—"}</span>
+        <span className="font-bold text-[#46286E]">{total > 0 ? getTierLabel(total) : "—"}</span>
       </div>
       {showResult && result && (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 space-y-2">
