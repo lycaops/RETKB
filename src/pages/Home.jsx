@@ -1,10 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import RetailerTable from '@/components/RetailerTable';
 import Dashboard from '@/components/Dashboard';
 import { useApp } from '@/lib/AppContext';
-import { getText } from '@/lib/csvUtils';
 import { Search, Database, Filter, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -12,13 +11,18 @@ export default function Home() {
   const {
     t,
     records,
+    setRecords,
     setSelectedRetailer,
     setScheme,
     loadingRecords,
     loadRecords,
     recordsError,
+    months,
+    filterOptions,
+    loadFilterOptions,
   } = useApp();
   const navigate = useNavigate();
+  const [month, setMonth] = useState('');
   const [query, setQuery] = useState('');
   const [branchFilter, setBranchFilter] = useState('');
   const [zoneFilter, setZoneFilter] = useState('');
@@ -33,45 +37,23 @@ export default function Home() {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      await loadRecords();
+      await runSearch();
     } finally {
       setRefreshing(false);
     }
   };
 
-  const branches = useMemo(() => {
-    const set = new Set();
-    for (const r of records) {
-      const b = getText(r, 'ACCMGRID');
-      if (b) set.add(b);
-    }
-    return Array.from(set).sort();
-  }, [records]);
+  useEffect(() => {
+    loadFilterOptions(month).catch((e) => console.error('Failed to load filter options:', e));
+  }, [month, loadFilterOptions]);
 
-  const zones = useMemo(() => {
-    const set = new Set();
-    for (const r of records) {
-      const z = getText(r, 'HOTSPOTID');
-      if (z) set.add(z);
-    }
-    return Array.from(set).sort();
-  }, [records]);
+  const runSearch = async () => {
+    if (!month) return;
+    await loadRecords({ month, retailerId: query, branch: branchFilter, zone: zoneFilter });
+  };
 
-  const filtered = useMemo(() => {
-    return records.filter((r) => {
-      if (branchFilter && getText(r, 'ACCMGRID') !== branchFilter) return false;
-      if (zoneFilter && getText(r, 'HOTSPOTID') !== zoneFilter) return false;
-      if (!query.trim()) return true;
-      const q = query.trim().toLowerCase();
-      const id = getText(r, 'RETAILER ID').toLowerCase();
-      const acc = getText(r, 'ACCMGRID').toLowerCase();
-      const hot = getText(r, 'HOTSPOTID').toLowerCase();
-      return id.includes(q) || acc.includes(q) || hot.includes(q);
-    });
-  }, [records, query, branchFilter, zoneFilter]);
-
-  const hasBranchData = branches.length > 0;
-  const hasZoneData = zones.length > 0;
+  const hasBranchData = filterOptions.branches.length > 0;
+  const hasZoneData = filterOptions.zones.length > 0;
   const showFilters = hasBranchData || hasZoneData;
 
   return (
@@ -98,7 +80,7 @@ export default function Home() {
           </div>
         )}
 
-        {!loadingRecords && records.length === 0 && (
+        {!loadingRecords && month && records.length === 0 && (
           <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
             <Database className="w-12 h-12 text-slate-300 mx-auto mb-4" />
             <h2 className="text-lg font-semibold text-slate-700 mb-1">
@@ -131,18 +113,40 @@ export default function Home() {
           </div>
         )}
 
-        {records.length > 0 && (
+        <>
           <>
             <div className="flex flex-wrap items-stretch gap-3">
+              <select
+                value={month}
+                onChange={(e) => {
+                  setMonth(e.target.value);
+                  setRecords([]);
+                  setQuery('');
+                  setBranchFilter('');
+                  setZoneFilter('');
+                }}
+                className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#006AE0] bg-white min-w-[180px]"
+              >
+                <option value="">{t('select_incentive_month')}</option>
+                {months.map((value) => <option key={value} value={value}>{value}</option>)}
+              </select>
               <div className="relative flex-1 min-w-[260px]">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder={t('search_placeholder')}
+                  placeholder={t('search_retailer_id_placeholder')}
+                  onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
                   className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-[#006AE0] bg-white"
                 />
               </div>
+              <button
+                onClick={runSearch}
+                disabled={!month || loadingRecords}
+                className="inline-flex items-center gap-2 justify-center px-4 rounded-lg text-sm font-medium text-white bg-[#006AE0] disabled:opacity-50"
+              >
+                <Search className="w-4 h-4" /> {t('search_retailer')}
+              </button>
               <button
                 onClick={handleRefresh}
                 disabled={refreshing || loadingRecords}
@@ -169,7 +173,7 @@ export default function Home() {
                     className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#006AE0] bg-white min-w-[140px]"
                   >
                     <option value="">{t('all_branches')}</option>
-                    {branches.map((b) => (
+                    {filterOptions.branches.map((b) => (
                       <option key={b} value={b}>
                         {b}
                       </option>
@@ -183,7 +187,7 @@ export default function Home() {
                     className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#006AE0] bg-white min-w-[140px]"
                   >
                     <option value="">{t('all_zones')}</option>
-                    {zones.map((z) => (
+                    {filterOptions.zones.map((z) => (
                       <option key={z} value={z}>
                         {z}
                       </option>
@@ -204,15 +208,19 @@ export default function Home() {
               </div>
             )}
 
-            <Dashboard records={filtered} />
-            <div>
-              <h2 className="text-sm font-semibold text-slate-700 mb-3">
-                {t('search_retailer')} ({filtered.length} / {records.length})
-              </h2>
-              <RetailerTable records={filtered} onSelect={handleSelect} />
-            </div>
+            {records.length > 0 && (
+              <>
+                <Dashboard records={records} />
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-700 mb-3">
+                    {t('search_retailer')} ({records.length} / 1000)
+                  </h2>
+                  <RetailerTable records={records} onSelect={handleSelect} />
+                </div>
+              </>
+            )}
           </>
-        )}
+        </>
       </div>
     </Layout>
   );

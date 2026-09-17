@@ -72,22 +72,51 @@ export function AppProvider({ children }) {
   const [selectedRetailer, setSelectedRetailer] = useState(null);
   const [loadingRecords, setLoadingRecords] = useState(false);
   const [recordsError, setRecordsError] = useState(null);
+  const [months, setMonths] = useState([]);
+  const [filterOptions, setFilterOptions] = useState({ branches: [], zones: [] });
 
   const t = useCallback((key) => translate(lang, key), [lang]);
 
-  const loadRecords = useCallback(async () => {
+  const loadMonths = useCallback(async () => {
+    const { data, error } = await supabase.rpc('get_incentive_months');
+    if (error) throw error;
+    setMonths((data || []).map((row) => row.month).filter(Boolean));
+  }, []);
+
+  const loadFilterOptions = useCallback(async (month) => {
+    if (!month) {
+      setFilterOptions({ branches: [], zones: [] });
+      return;
+    }
+    const { data, error } = await supabase.rpc('get_incentive_filter_options', { p_month: month });
+    if (error) throw error;
+    const branches = new Set();
+    const zones = new Set();
+    for (const row of data || []) {
+      if (row.accmgrid) branches.add(row.accmgrid);
+      if (row.hotspotid) zones.add(row.hotspotid);
+    }
+    setFilterOptions({
+      branches: Array.from(branches).sort(),
+      zones: Array.from(zones).sort(),
+    });
+  }, []);
+
+  const loadRecords = useCallback(async (filters = {}) => {
     setLoadingRecords(true);
     setRecordsError(null);
     try {
       const url = import.meta.env.VITE_SUPABASE_URL;
       const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
       let mapped = [];
-      if (url && anonKey && url !== 'http://localhost') {
-        const { data, error } = await supabase
-          .from('retailer_incentives')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(5000);
+      if (url && anonKey && url !== 'http://localhost' && filters.month) {
+        const { data, error } = await supabase.rpc('search_incentive_records', {
+          p_month: filters.month,
+          p_retailer_id: filters.retailerId || null,
+          p_accmgrid: filters.branch || null,
+          p_hotspotid: filters.zone || null,
+          p_limit: 1000,
+        });
         if (error) throw error;
         mapped = (data || []).map((r) => {
           const display = toDisplayRow(r);
@@ -122,8 +151,13 @@ export function AppProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    loadRecords();
-  }, [loadRecords]);
+    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      loadMonths().catch((e) => {
+        console.error('Failed to load incentive months:', e);
+        setRecordsError(e?.message || 'Failed to load incentive months');
+      });
+    }
+  }, [loadMonths]);
 
   const value = useMemo(
     () => ({
@@ -141,6 +175,10 @@ export function AppProvider({ children }) {
       loadRecords,
       loadingRecords,
       recordsError,
+      months,
+      filterOptions,
+      loadMonths,
+      loadFilterOptions,
     }),
     [
       lang,
@@ -152,6 +190,10 @@ export function AppProvider({ children }) {
       loadRecords,
       loadingRecords,
       recordsError,
+      months,
+      filterOptions,
+      loadMonths,
+      loadFilterOptions,
     ],
   );
 
