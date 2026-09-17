@@ -1,0 +1,13 @@
+{
+  "name": "Retailer Incentive Statement",
+  "short_name": "Incentive Statement",
+  "start_url": "/",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "https://cms-assets.ldsvcplatform.com/IT/s3fs-public/2023-09/MicrosoftTeams-image%20%2813%29.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

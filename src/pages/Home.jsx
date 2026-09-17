@@ -4,8 +4,7 @@ import Layout from '@/components/Layout';
 import RetailerTable from '@/components/RetailerTable';
 import Dashboard from '@/components/Dashboard';
 import { useApp } from '@/lib/AppContext';
-import { Search, Database, Filter, RefreshCw } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Search, Database, Filter } from 'lucide-react';
 
 export default function Home() {
   const {
@@ -26,7 +25,6 @@ export default function Home() {
   const [query, setQuery] = useState('');
   const [branchFilter, setBranchFilter] = useState('');
   const [zoneFilter, setZoneFilter] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
 
   const handleSelect = (row) => {
     if (row?._scheme) setScheme(row._scheme);
@@ -34,18 +32,9 @@ export default function Home() {
     navigate('/statement');
   };
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await runSearch();
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
   useEffect(() => {
-    loadFilterOptions(month).catch((e) => console.error('Failed to load filter options:', e));
-  }, [month, loadFilterOptions]);
+    loadFilterOptions(month, branchFilter).catch((e) => console.error('Failed to load filter options:', e));
+  }, [month, branchFilter, loadFilterOptions]);
 
   const runSearch = async () => {
     if (!month) return;
@@ -77,39 +66,6 @@ export default function Home() {
         {loadingRecords && records.length === 0 && (
           <div className="flex items-center justify-center py-12">
             <div className="w-8 h-8 border-4 border-slate-200 border-t-[#21264e] rounded-full animate-spin" />
-          </div>
-        )}
-
-        {!loadingRecords && month && records.length === 0 && (
-          <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
-            <Database className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h2 className="text-lg font-semibold text-slate-700 mb-1">
-              {t('db_no_records')}
-            </h2>
-            <p className="text-sm text-slate-500 mb-5 max-w-xl mx-auto">
-              No retailer incentive data was found. Insert rows into the Supabase{' '}
-              <code className="px-1.5 py-0.5 rounded bg-slate-100">retailer_incentives</code> table
-              using the SQL Editor or Table Editor in your Supabase dashboard.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <Link
-                to="/scheme"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-[#21264e] border border-[#21264e]/30 bg-[#21264e]/5 hover:bg-[#21264e]/10"
-              >
-                View Scheme Reference
-              </Link>
-              <button
-                onClick={handleRefresh}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white"
-                style={{ backgroundColor: '#21264e' }}
-              >
-                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                Refresh Data
-              </button>
-            </div>
-            <p className="text-xs text-slate-400 mt-6">
-              See README.md for column mapping and example INSERT SQL.
-            </p>
           </div>
         )}
 
@@ -147,18 +103,6 @@ export default function Home() {
               >
                 <Search className="w-4 h-4" /> {t('search_retailer')}
               </button>
-              <button
-                onClick={handleRefresh}
-                disabled={refreshing || loadingRecords}
-                title="Refresh data"
-                className="inline-flex items-center justify-center w-11 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-60"
-              >
-                <RefreshCw
-                  className={`w-4 h-4 text-slate-600 ${
-                    refreshing || loadingRecords ? 'animate-spin' : ''
-                  }`}
-                />
-              </button>
             </div>
 
             {showFilters && (
@@ -169,7 +113,10 @@ export default function Home() {
                 {hasBranchData && (
                   <select
                     value={branchFilter}
-                    onChange={(e) => setBranchFilter(e.target.value)}
+                    onChange={(e) => {
+                      setBranchFilter(e.target.value);
+                      setZoneFilter('');
+                    }}
                     className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#006AE0] bg-white min-w-[140px]"
                   >
                     <option value="">{t('all_branches')}</option>

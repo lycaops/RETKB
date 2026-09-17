@@ -83,7 +83,7 @@ export function AppProvider({ children }) {
     setMonths((data || []).map((row) => row.month).filter(Boolean));
   }, []);
 
-  const loadFilterOptions = useCallback(async (month) => {
+  const loadFilterOptions = useCallback(async (month, branch = '') => {
     if (!month) {
       setFilterOptions({ branches: [], zones: [] });
       return;
@@ -94,7 +94,7 @@ export function AppProvider({ children }) {
     const zones = new Set();
     for (const row of data || []) {
       if (row.accmgrid) branches.add(row.accmgrid);
-      if (row.hotspotid) zones.add(row.hotspotid);
+      if (row.hotspotid && (!branch || row.accmgrid === branch)) zones.add(row.hotspotid);
     }
     setFilterOptions({
       branches: Array.from(branches).sort(),

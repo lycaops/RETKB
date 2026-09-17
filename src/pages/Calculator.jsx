@@ -28,6 +28,16 @@ export default function Calculator() {
     .reduce((total, result) => total + (result.grand || 0), 0);
   const hasEstimate = Boolean(estimateResults.newActivations || estimateResults.mnp);
 
+  const CalculationRow = ({ label, value, muted = false }) => (
+    <div className={`flex justify-between gap-4 ${muted ? "text-slate-500" : "text-slate-700"}`}>
+      <span>{label}</span>
+      <span className="font-semibold whitespace-nowrap">€{Number(value || 0).toFixed(2)}</span>
+    </div>
+  );
+
+  const newResult = estimateResults.newActivations;
+  const mnpResult = estimateResults.mnp;
+
   return (
     <Layout>
       <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
@@ -117,8 +127,25 @@ export default function Calculator() {
               {lang === "it" ? "Riepilogo Guadagni" : "Earnings Summary"}
             </p>
             <div className="mt-3 space-y-2 text-sm">
-              <div className="flex justify-between"><span>{lang === "it" ? "Nuove Attivazioni" : "New Activations"}</span><span className="font-semibold">€{(estimateResults.newActivations?.grand || 0).toFixed(2)}</span></div>
-              <div className="flex justify-between"><span>MNP Port-In</span><span className="font-semibold">€{(estimateResults.mnp?.grand || 0).toFixed(2)}</span></div>
+              <p className="font-semibold text-slate-800">{lang === "it" ? "Nuove Attivazioni" : "New Activations"}</p>
+              {newResult?.totalLTE !== undefined && <CalculationRow label={`${newResult.totalLTE / (newResult.rateLTE || 1)} × €${newResult.rateLTE} (≤ €6.99)`} value={newResult.totalLTE} muted />}
+              {newResult?.totalGT !== undefined && <CalculationRow label={`${newResult.totalGT / (newResult.rateGT || 1)} × €${newResult.rateGT} (> €6.99)`} value={newResult.totalGT} muted />}
+              {newResult?.actRows?.map((row, index) => <CalculationRow key={index} label={`${row.qty} × €${row.bonus.toFixed(2)} activation bonus`} value={row.amount} muted />)}
+              {newResult?.t1Total > 0 && <CalculationRow label={`T1: ${newResult.t1Used} × €4`} value={newResult.t1Total} muted />}
+              {newResult?.t2Total > 0 && <CalculationRow label={`T2: ${newResult.t2Used} × €4`} value={newResult.t2Total} muted />}
+              {newResult && <CalculationRow label={lang === "it" ? "Totale Nuove Attivazioni" : "New Activation Total"} value={newResult.grand} />}
+              {mnpResult && <>
+                <p className="font-semibold text-slate-800 pt-2">MNP Port-In</p>
+                {mnpResult.stdLTE !== undefined && <CalculationRow label={`${mnpResult.stdLTE / (mnpResult.rateLTE || 1)} × €${mnpResult.rateLTE} (≤ €6.99)`} value={mnpResult.stdLTE} muted />}
+                {mnpResult.stdGT !== undefined && <CalculationRow label={`${mnpResult.stdGT / (mnpResult.rateGT || 1)} × €${mnpResult.rateGT} (> €6.99)`} value={mnpResult.stdGT} muted />}
+                {mnpResult.garaPremTotal > 0 && <CalculationRow label={`GARA Premium: ${mnpResult.garaPremTotal / 40} × €40`} value={mnpResult.garaPremTotal} muted />}
+                {mnpResult.garaOthTotal > 0 && <CalculationRow label={`GARA Other: ${mnpResult.garaOthTotal / 20} × €20`} value={mnpResult.garaOthTotal} muted />}
+                <CalculationRow label={lang === "it" ? "Totale MNP" : "MNP Activation Total"} value={mnpResult.grand} />
+              </>}
+              {newResult?.rechargeTotal > 0 && <CalculationRow label={lang === "it" ? "Cashback Ricarica Automatica" : "Auto Recharge Cashback"} value={newResult.rechargeTotal} muted />}
+              {mnpResult?.rechargeTotal > 0 && <CalculationRow label={lang === "it" ? "Cashback Ricarica Automatica MNP" : "MNP Auto Recharge Cashback"} value={mnpResult.rechargeTotal} muted />}
+              {newResult?.simMarginTotal > 0 && <CalculationRow label={lang === "it" ? "Margine SIM Nuove Attivazioni" : "New Activation SIM Margin"} value={newResult.simMarginTotal} muted />}
+              {mnpResult?.simMarginTotal > 0 && <CalculationRow label={lang === "it" ? "Margine SIM MNP" : "MNP SIM Margin"} value={mnpResult.simMarginTotal} muted />}
               <div className="flex justify-between border-t border-emerald-200 pt-2"><span className="font-semibold text-slate-700">{lang === "it" ? "Guadagni Totali" : "Total Earnings"}</span><span className="text-2xl font-bold text-emerald-600">€{totalEstimate.toFixed(2)}</span></div>
             </div>
           </div>
