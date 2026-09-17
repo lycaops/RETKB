@@ -4,26 +4,52 @@ import { useApp } from "@/lib/AppContext";
 import { schemes as schemesMap } from "@/lib/schemeReference";
 
 export default function SchemeReference() {
-  const { t, lang, scheme } = useApp();
+  const { t, lang, scheme, setScheme } = useApp();
   const s = schemesMap[scheme] || schemesMap.special;
 
   return (
     <Layout>
       <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
         <div className="rounded-xl p-6" style={{ backgroundColor: "#21264e" }}>
-          <div className="flex items-center gap-2 mb-1">
-            <span
-              className="inline-block px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide"
-              style={{ backgroundColor: scheme === "special" ? "#08dc7d" : "#006AE0", color: "#21264e" }}
-            >
-              {scheme === "special" ? t("scheme_special") : t("scheme_normal")}
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span
+                  className="inline-block px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide"
+                  style={{ backgroundColor: scheme === "special" ? "#08dc7d" : "#006AE0", color: "#21264e" }}
+                >
+                  {scheme === "special" ? t("scheme_special") : t("scheme_normal")}
+                </span>
+              </div>
+              <h1 className="text-xl font-bold text-white">{s.title[lang]}</h1>
+              <p className="text-sm text-white/70 mt-1">{s.subtitle[lang]}</p>
+              {!s.usageCheck && (
+                <p className="text-xs text-[#08dc7d] mt-2 font-medium">{t("scheme_no_usage_check")}</p>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-white/20">
+              <button
+                onClick={() => setScheme("special")}
+                className={`px-3 py-1.5 text-xs rounded font-medium transition-colors ${
+                  scheme === "special"
+                    ? "bg-[#08dc7d] text-[#21264e]"
+                    : "text-white/70 hover:bg-white/10"
+                }`}
+              >
+                {lang === "it" ? "Speciale" : "Special"}
+              </button>
+              <button
+                onClick={() => setScheme("normal")}
+                className={`px-3 py-1.5 text-xs rounded font-medium transition-colors ${
+                  scheme === "normal"
+                    ? "bg-[#006AE0] text-white"
+                    : "text-white/70 hover:bg-white/10"
+                }`}
+              >
+                {lang === "it" ? "Normale" : "Normal"}
+              </button>
+            </div>
           </div>
-          <h1 className="text-xl font-bold text-white">{s.title[lang]}</h1>
-          <p className="text-sm text-white/70 mt-1">{s.subtitle[lang]}</p>
-          {!s.usageCheck && (
-            <p className="text-xs text-[#08dc7d] mt-2 font-medium">{t("scheme_no_usage_check")}</p>
-          )}
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200 p-6">

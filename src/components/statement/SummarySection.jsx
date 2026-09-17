@@ -1,7 +1,7 @@
 import React from "react";
 import { useApp } from "@/lib/AppContext";
 import { formatCurrency, formatNumber } from "@/lib/csvUtils";
-import { CreditCard, Building2, Ticket, Wallet } from "lucide-react";
+import { CreditCard, Building2, Ticket, Wallet, Forward } from "lucide-react";
 
 function MetricRow({ label, value, color, bold }) {
   return (
@@ -18,8 +18,21 @@ export default function SummarySection({ statement }) {
   const { t, lang } = useApp();
   const s = statement.summary;
   const fmt = (v) => (v === null ? "—" : formatCurrency(v, lang));
-  const moodMap = { SBT: t("payment_mood_sbt"), BT: t("payment_mood_bt"), VOU: t("payment_mood_vou") };
-  const moodIconMap = { SBT: CreditCard, BT: Building2, VOU: Ticket };
+  const moodMap = {
+    "C/F": t("payment_mood_cf"), "CF": t("payment_mood_cf"),
+    "By C/F": t("payment_mood_cf"), "By CF": t("payment_mood_cf"), "by C/F": t("payment_mood_cf"),
+    SBT: t("payment_mood_sbt"), "By SBT": t("payment_mood_sbt"), "by SBT": t("payment_mood_sbt"),
+    BT: t("payment_mood_bt"), "By BT": t("payment_mood_bt"), "by BT": t("payment_mood_bt"),
+    VOU: t("payment_mood_vou"), Vou: t("payment_mood_vou"),
+    "By Vou": t("payment_mood_vou"), "By VOU": t("payment_mood_vou"), "by Vou": t("payment_mood_vou"), "by VOU": t("payment_mood_vou"),
+  };
+  const moodIconMap = {
+    "C/F": Forward, "CF": Forward,
+    "By C/F": Forward, "By CF": Forward, "by C/F": Forward,
+    SBT: CreditCard, "By SBT": CreditCard, "by SBT": CreditCard,
+    BT: Building2, "By BT": Building2, "by BT": Building2,
+    VOU: Ticket, Vou: Ticket, "By Vou": Ticket, "By VOU": Ticket, "by Vou": Ticket, "by VOU": Ticket,
+  };
   const MoodIcon = statement.paymentMood ? moodIconMap[statement.paymentMood] || Wallet : null;
   const moodLabel = statement.paymentMood ? (
     <span className="inline-flex items-center gap-2">
